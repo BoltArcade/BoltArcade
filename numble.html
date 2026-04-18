@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NUMBLE — BOLT ARCADE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:#08080f;font-family:'Inter',sans-serif;color:#fff;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#page{position:relative;z-index:1;width:100%;max-width:480px;padding:0 20px 60px;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+header{display:flex;align-items:center;justify-content:space-between;width:100%;padding:20px 0 0;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;}
+.back-btn:hover{color:rgba(255,255,255,0.7);}
+.back-btn svg{width:16px;height:16px;}
+.header-logo{font-family:'Russo One',sans-serif;font-size:13px;letter-spacing:0.22em;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.daily-badge{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 10px;}
+
+.game-title{font-family:'Russo One',sans-serif;font-size:clamp(36px,10vw,56px);letter-spacing:0.12em;text-align:center;margin:20px 0 2px;background:linear-gradient(160deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.game-sub{text-align:center;font-size:12px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:4px;}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;}
+.leg-dot{width:12px;height:12px;border-radius:3px;}
+.leg-correct{background:#22c55e;}
+.leg-high{background:#ef4444;}
+.leg-low{background:#3b82f6;}
+
+/* STREAK */
+.streak-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;}
+.streak-num{font-family:'Russo One',sans-serif;font-size:18px;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* CATEGORY */
+.category-wrap{margin-bottom:14px;text-align:center;}
+.category-chip{display:inline-block;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;padding:6px 18px;border-radius:20px;background:rgba(249,200,70,0.08);border:1px solid rgba(249,200,70,0.15);color:rgba(249,200,70,0.7);}
+.category-hint{font-size:11px;color:rgba(255,255,255,0.25);margin-top:6px;letter-spacing:0.05em;}
+
+/* GRID */
+#grid{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;width:100%;}
+.grid-row{display:flex;gap:6px;justify-content:center;align-items:center;}
+.tile{
+  width:56px;height:56px;
+  border:2px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Russo One',sans-serif;
+  font-size:24px;
+  transition:border-color 0.1s,background 0.3s;
+  user-select:none;
+}
+.tile.active-row{border-color:rgba(255,255,255,0.25);}
+.tile.filled{border-color:rgba(249,200,70,0.4);}
+.tile.flip{animation:tileFlip 0.5s ease forwards;}
+@keyframes tileFlip{0%{transform:rotateX(0);}50%{transform:rotateX(-90deg);}100%{transform:rotateX(0);}}
+.tile.correct{background:#22c55e;border-color:#22c55e;color:#fff;}
+.tile.high{background:#ef4444;border-color:#ef4444;color:#fff;}
+.tile.low{background:#3b82f6;border-color:#3b82f6;color:#fff;}
+
+/* FEEDBACK ROW */
+.feedback{
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;letter-spacing:0.1em;color:rgba(255,255,255,0.25);
+  padding-left:4px;min-width:80px;
+}
+.feedback.too-high{color:#ef4444;}
+.feedback.too-low{color:#3b82f6;}
+.feedback.exact{color:#22c55e;}
+
+/* MESSAGE */
+#message{height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:10px;font-weight:600;}
+
+/* NUMBER PAD */
+#numpad{display:flex;flex-direction:column;gap:6px;width:100%;margin-bottom:14px;}
+.np-row{display:flex;gap:6px;justify-content:center;}
+.np-key{
+  width:80px;height:52px;
+  background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;font-family:'Russo One',sans-serif;font-size:20px;
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.12s,transform 0.08s;
+  -webkit-tap-highlight-color:transparent;
+}
+.np-key:active{transform:scale(0.93);background:#252538;}
+.np-key.wide{width:100px;}
+.np-key.enter-key{background:linear-gradient(90deg,#f9c846,#f97316);color:#08080f;}
+.np-key.enter-key:active{opacity:0.85;}
+
+/* GIVE UP */
+#giveup-btn{width:100%;padding:12px;background:transparent;border:1px solid rgba(249,64,96,0.2);border-radius:12px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(249,64,96,0.4);cursor:pointer;margin-top:4px;transition:all 0.2s;}
+#giveup-btn:hover{border-color:rgba(249,64,96,0.45);color:rgba(249,64,96,0.7);}
+
+/* RESULT */
+#result-overlay{position:fixed;inset:0;z-index:100;background:rgba(8,8,15,0.96);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:30px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#result-overlay.show{opacity:1;pointer-events:all;}
+.result-icon{font-size:64px;margin-bottom:14px;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
+.result-label{font-family:'Russo One',sans-serif;font-size:clamp(28px,9vw,46px);letter-spacing:0.08em;text-align:center;margin-bottom:10px;}
+.result-label.win{background:linear-gradient(90deg,#f9c846,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-label.lose{background:linear-gradient(90deg,#f94060,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-answer{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
+.result-number{font-family:'Russo One',sans-serif;font-size:48px;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.result-category{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:20px;}
+.result-guesses{font-family:'Russo One',sans-serif;font-size:44px;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.result-guesses-label{font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:8px;}
+.comeback{font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:24px;}
+.result-grid{display:flex;flex-direction:column;gap:3px;margin-bottom:20px;}
+.result-row-r{display:flex;gap:3px;justify-content:center;align-items:center;}
+.r-tile{width:14px;height:14px;border-radius:2px;}
+.r-tile.correct{background:#22c55e;}
+.r-tile.high{background:#ef4444;}
+.r-tile.low{background:#3b82f6;}
+.share-btn{width:100%;max-width:320px;padding:15px;background:linear-gradient(90deg,#f9c846,#f97316);border:none;border-radius:12px;font-family:'Russo One',sans-serif;font-size:14px;letter-spacing:0.15em;color:#08080f;cursor:pointer;margin-bottom:12px;}
+.home-btn{width:100%;max-width:320px;padding:13px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);cursor:pointer;text-decoration:none;display:block;text-align:center;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="page">
+  <header>
+    <a href="index.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+      BACK
+    </a>
+    <div class="header-logo">BOLT ARCADE</div>
+    <div class="daily-badge">DAILY</div>
+  </header>
+
+  <div class="game-title">NUMBLE</div>
+  <div class="game-sub">Guess the number</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="leg-dot leg-correct"></div>Exact</div>
+    <div class="legend-item"><div class="leg-dot leg-high"></div>Too high</div>
+    <div class="legend-item"><div class="leg-dot leg-low"></div>Too low</div>
+  </div>
+
+  <div class="streak-bar">🔥 STREAK: <span class="streak-num" id="streak-display">0</span></div>
+
+  <div class="category-wrap">
+    <div class="category-chip" id="category-chip">Loading...</div>
+    <div class="category-hint" id="category-hint"></div>
+  </div>
+
+  <div id="grid"></div>
+  <div id="message"></div>
+  <div id="numpad"></div>
+  <button id="giveup-btn">🏳️ GIVE UP</button>
+</div>
+
+<div id="result-overlay">
+  <div class="result-icon" id="result-icon"></div>
+  <div class="result-label" id="result-label"></div>
+  <div class="result-answer">The answer was</div>
+  <div class="result-number" id="result-number"></div>
+  <div class="result-category" id="result-category"></div>
+  <div class="result-grid" id="result-grid"></div>
+  <div class="result-guesses" id="result-guesses"></div>
+  <div class="result-guesses-label" id="result-guesses-label"></div>
+  <div class="comeback" id="comeback-txt"></div>
+  <button class="share-btn" id="share-btn">📤 SHARE RESULT</button>
+  <a href="index.html" class="home-btn">🏠 BACK TO ARCADE</a>
+</div>
+
+<script>
+// BG
+const bgC=document.getElementById('bg'),bgX=bgC.getContext('2d');let stars=[];
+function initBg(){bgC.width=innerWidth;bgC.height=innerHeight;stars=Array.from({length:80},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+0.3,a:Math.random(),s:Math.random()*0.005+0.002}));}
+function drawBg(){bgX.clearRect(0,0,bgC.width,bgC.height);stars.forEach(s=>{s.a+=s.s;if(s.a>1||s.a<0)s.s*=-1;bgX.globalAlpha=s.a*0.4;bgX.fillStyle='#f97316';bgX.beginPath();bgX.arc(s.x,s.y,s.r,0,Math.PI*2);bgX.fill();});bgX.globalAlpha=1;requestAnimationFrame(drawBg);}
+initBg();drawBg();window.addEventListener('resize',initBg);
+
+// ── PUZZLES ──
+// answer is always a number (as string), digits = number of tiles
+const PUZZLES = [
+  {answer:"23",   category:"NBA Jersey",    hint:"Michael Jordan's number"},
+  {answer:"33",   category:"NBA Jersey",    hint:"Larry Bird's number"},
+  {answer:"6",    category:"NBA Jersey",    hint:"LeBron's current number"},
+  {answer:"30",   category:"NBA Jersey",    hint:"Stephen Curry's number"},
+  {answer:"35",   category:"NBA Jersey",    hint:"Kevin Durant's number"},
+  {answer:"24",   category:"NBA Jersey",    hint:"Kobe's second number"},
+  {answer:"3",    category:"NBA Jersey",    hint:"Dwyane Wade / CP3"},
+  {answer:"77",   category:"NBA Jersey",    hint:"Luka Doncic's number"},
+  {answer:"34",   category:"NBA Jersey",    hint:"Giannis's number"},
+  {answer:"0",    category:"NBA Jersey",    hint:"Damian Lillard / Jayson Tatum"},
+  {answer:"1971", category:"Year",          hint:"Muhammad Ali fights Joe Frazier 'Fight of the Century'"},
+  {answer:"1992", category:"Year",          hint:"The Dream Team wins gold at Barcelona Olympics"},
+  {answer:"1984", category:"Year",          hint:"Michael Jordan is drafted by the Bulls"},
+  {answer:"2003", category:"Year",          hint:"LeBron James is drafted #1 overall"},
+  {answer:"2016", category:"Year",          hint:"Cleveland Cavaliers win their first NBA title"},
+  {answer:"2012", category:"Year",          hint:"LeBron wins his first NBA championship"},
+  {answer:"1996", category:"Year",          hint:"Kobe Bryant drafted 13th overall"},
+  {answer:"2001", category:"Year",          hint:"Allen Iverson leads 76ers to Finals"},
+  {answer:"100",  category:"NBA Record",    hint:"Wilt Chamberlain's single-game points record"},
+  {answer:"38387",category:"NBA Record",    hint:"LeBron James all-time points record (approx)"},
+  {answer:"50",   category:"NBA Stat",      hint:"Points Kobe scored vs Toronto in 2006... almost. He got 81"},
+  {answer:"81",   category:"NBA Record",    hint:"Kobe Bryant's second-highest NBA single game points"},
+  {answer:"73",   category:"NBA Record",    hint:"Warriors wins in 2015-16 season"},
+  {answer:"72",   category:"NBA Record",    hint:"Bulls wins in 1995-96 season"},
+  {answer:"1979", category:"Year",          hint:"Magic Johnson and Larry Bird enter the NBA"},
+  {answer:"2008", category:"Year",          hint:"Kobe Bryant wins his only MVP award"},
+  {answer:"4",    category:"Count",         hint:"LeBron's number of championships"},
+  {answer:"6",    category:"Count",         hint:"Michael Jordan's championships"},
+  {answer:"5",    category:"Count",         hint:"Kobe Bryant's championships"},
+  {answer:"3",    category:"Count",         hint:"Dwyane Wade's championships"},
+  {answer:"15",   category:"Count",         hint:"Number of NBA teams in each conference"},
+  {answer:"82",   category:"Count",         hint:"Regular season games per team"},
+  {answer:"48",   category:"Count",         hint:"Minutes in an NBA game"},
+  {answer:"24",   category:"Shot Clock",    hint:"Seconds on the shot clock"},
+  {answer:"10",   category:"Count",         hint:"Feet — height of an NBA hoop"},
+  {answer:"94",   category:"Court",         hint:"Length in feet of an NBA court"},
+  {answer:"50",   category:"Count",         hint:"NBA Finals MVPs awarded (approx through 2024)"},
+  {answer:"1947", category:"Year",          hint:"The year the NBA was founded (as BAA)"},
+  {answer:"30",   category:"Count",         hint:"Number of NBA teams"},
+  {answer:"2",    category:"Count",         hint:"Points for a regular basket"},
+  {answer:"1",    category:"Count",         hint:"Points for a free throw"},
+  {answer:"3",    category:"Count",         hint:"Points for a three-pointer"},
+  {answer:"7",    category:"Count",         hint:"Games in an NBA Finals series (max)"},
+  {answer:"5",    category:"Count",         hint:"Players on the court per team"},
+  {answer:"12",   category:"Count",         hint:"Players on an NBA roster"},
+  {answer:"2009", category:"Year",          hint:"Kobe wins his first title without Shaq"},
+  {answer:"2020", category:"Year",          hint:"Lakers win championship in the Bubble"},
+  {answer:"2023", category:"Year",          hint:"Denver Nuggets win their first ever championship"},
+  {answer:"36",   category:"Count",         hint:"Age LeBron James became all-time leading scorer"},
+  {answer:"63",   category:"NBA Record",    hint:"Michael Jordan's playoff points record vs Celtics (1986)"},
+];
+
+// ── EST DATE ──
+function getESTDateKey(){
+  const now=new Date();
+  const jan=new Date(now.getFullYear(),0,1).getTimezoneOffset();
+  const jul=new Date(now.getFullYear(),6,1).getTimezoneOffset();
+  const isDST=now.getTimezoneOffset()<Math.max(jan,jul);
+  const offsetMin=-5*60+(isDST?60:0);
+  const estTime=new Date(now.getTime()+(now.getTimezoneOffset()+offsetMin)*60000);
+  return estTime.toISOString().slice(0,10);
+}
+function getDayIndex(){
+  const start=new Date('2024-01-01');
+  const now=new Date(getESTDateKey());
+  return Math.floor((now-start)/(1000*60*60*24))%PUZZLES.length;
+}
+
+const todayData=PUZZLES[getDayIndex()];
+const ANSWER=todayData.answer; // string of digits
+const DIGITS=ANSWER.length;
+const dateKey=getESTDateKey();
+const storageKey=`numble_${dateKey}`;
+const MAX_GUESSES=6;
+
+// ── STATE ──
+let guesses=[]; // array of string guesses
+let currentGuess=[];
+let gameOver=false;
+let won=false;
+const saved=localStorage.getItem(storageKey);
+if(saved){const s=JSON.parse(saved);guesses=s.guesses||[];gameOver=s.gameOver||false;won=s.won||false;}
+
+// ── STREAK ──
+function getStreak(){return parseInt(localStorage.getItem('numble_streak')||'0');}
+function updateStreak(w){
+  const yesterday=new Date(getESTDateKey());yesterday.setDate(yesterday.getDate()-1);
+  const yk=yesterday.toISOString().slice(0,10);
+  const lastWin=localStorage.getItem('numble_lastwin');
+  let streak=getStreak();
+  if(w){if(lastWin===yk)streak++;else if(lastWin===dateKey){}else streak=1;localStorage.setItem('numble_lastwin',dateKey);localStorage.setItem('numble_streak',streak);}
+  else{localStorage.setItem('numble_streak','0');}
+  return streak;
+}
+document.getElementById('streak-display').textContent=getStreak();
+document.getElementById('category-chip').textContent=`${todayData.category}`;
+document.getElementById('category-hint').textContent=todayData.hint;
+
+// ── EVALUATE ──
+// Per digit: correct, high (guess digit > answer digit), low (guess digit < answer digit)
+// Also overall: if total number is higher or lower
+function evaluateGuess(guess){
+  const guessNum=parseInt(guess);
+  const answerNum=parseInt(ANSWER);
+  const result=[];
+  for(let i=0;i<DIGITS;i++){
+    const gd=parseInt(guess[i]);
+    const ad=parseInt(ANSWER[i]);
+    if(gd===ad) result.push('correct');
+    else if(gd>ad) result.push('high');
+    else result.push('low');
+  }
+  // overall direction
+  let overall='exact';
+  if(guessNum>answerNum) overall='high';
+  else if(guessNum<answerNum) overall='low';
+  return {result, overall, guessNum, answerNum};
+}
+
+// ── BUILD GRID ──
+function buildGrid(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  for(let r=0;r<MAX_GUESSES;r++){
+    const row=document.createElement('div');
+    row.className='grid-row';
+    row.id=`row-${r}`;
+    for(let c=0;c<DIGITS;c++){
+      const tile=document.createElement('div');
+      tile.className='tile';
+      tile.id=`tile-${r}-${c}`;
+      row.appendChild(tile);
+    }
+    // feedback label
+    const fb=document.createElement('div');
+    fb.className='feedback';
+    fb.id=`fb-${r}`;
+    row.appendChild(fb);
+    grid.appendChild(row);
+  }
+}
+
+// ── BUILD NUMPAD ──
+function buildNumpad(){
+  const np=document.getElementById('numpad');
+  np.innerHTML='';
+  const rows=[['1','2','3'],['4','5','6'],['7','8','9'],['⌫','0','ENTER']];
+  rows.forEach(row=>{
+    const rowEl=document.createElement('div');
+    rowEl.className='np-row';
+    row.forEach(k=>{
+      const btn=document.createElement('div');
+      btn.className='np-key'+(k==='ENTER'?' enter-key wide':k==='⌫'?' wide':'');
+      btn.textContent=k;
+      btn.addEventListener('click',()=>handleKey(k));
+      rowEl.appendChild(btn);
+    });
+    np.appendChild(rowEl);
+  });
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key>='0'&&e.key<='9') handleKey(e.key);
+  else if(e.key==='Backspace') handleKey('⌫');
+  else if(e.key==='Enter') handleKey('ENTER');
+});
+
+function handleKey(k){
+  if(gameOver)return;
+  if(k==='⌫'){currentGuess.pop();renderCurrentGuess();}
+  else if(k==='ENTER'){submitGuess();}
+  else if(/^[0-9]$/.test(k)&&currentGuess.length<DIGITS){currentGuess.push(k);renderCurrentGuess();}
+}
+
+function renderCurrentGuess(){
+  if(gameOver)return;
+  const ri=guesses.length;
+  if(ri>=MAX_GUESSES)return;
+  for(let ci=0;ci<DIGITS;ci++){
+    const tile=document.getElementById(`tile-${ri}-${ci}`);
+    if(!tile)continue;
+    const d=currentGuess[ci]||'';
+    tile.textContent=d;
+    if(d){tile.classList.add('filled');}else{tile.classList.remove('filled');}
+  }
+}
+
+function showMsg(txt,dur=1500){
+  const el=document.getElementById('message');
+  el.textContent=txt;
+  if(dur>0)setTimeout(()=>{if(el.textContent===txt)el.textContent='';},dur);
+}
+
+function shake(){
+  const row=document.getElementById(`row-${guesses.length}`);
+  if(!row)return;
+  row.style.animation='shake 0.4s ease';
+  setTimeout(()=>row.style.animation='',400);
+}
+
+function submitGuess(){
+  if(gameOver)return;
+  const guess=currentGuess.join('');
+  if(guess.length!==DIGITS){showMsg(`Need ${DIGITS} digits`);shake();return;}
+  guesses.push(guess);
+  currentGuess=[];
+  const {result,overall}=evaluateGuess(guess);
+  const ri=guesses.length-1;
+
+  // Animate tiles
+  for(let ci=0;ci<DIGITS;ci++){
+    const tile=document.getElementById(`tile-${ri}-${ci}`);
+    if(tile){
+      tile.textContent=guess[ci];
+      tile.classList.remove('filled','active-row');
+      const state=result[ci];
+      setTimeout(()=>{
+        tile.classList.add('flip');
+        setTimeout(()=>tile.classList.add(state),250);
+      },ci*100);
+    }
+  }
+
+  // Feedback label
+  setTimeout(()=>{
+    const fb=document.getElementById(`fb-${ri}`);
+    if(fb){
+      if(overall==='exact'){fb.textContent='✓';fb.className='feedback exact';}
+      else if(overall==='high'){fb.textContent='↓ TOO HIGH';fb.className='feedback too-high';}
+      else{fb.textContent='↑ TOO LOW';fb.className='feedback too-low';}
+    }
+  },DIGITS*100+300);
+
+  if(guess===ANSWER){
+    won=true;gameOver=true;
+    setTimeout(()=>{showMsg('NUMBLE! 🔢',0);setTimeout(showResult,1200);},DIGITS*100+500);
+  } else if(guesses.length>=MAX_GUESSES){
+    gameOver=true;
+    setTimeout(showResult,DIGITS*100+700);
+  } else {
+    // activate next row
+    setTimeout(()=>{
+      const nextRow=document.getElementById(`row-${guesses.length}`);
+      if(nextRow)nextRow.querySelectorAll('.tile').forEach(t=>t.classList.add('active-row'));
+      renderCurrentGuess();
+    },DIGITS*100+400);
+  }
+  saveState();
+}
+
+function saveState(){localStorage.setItem(storageKey,JSON.stringify({guesses,gameOver,won}));}
+
+// ── RENDER SAVED GUESSES ──
+function renderSavedGuesses(){
+  guesses.forEach((g,ri)=>{
+    const {result,overall}=evaluateGuess(g);
+    for(let ci=0;ci<DIGITS;ci++){
+      const tile=document.getElementById(`tile-${ri}-${ci}`);
+      if(tile){tile.textContent=g[ci];tile.classList.add(result[ci]);}
+    }
+    const fb=document.getElementById(`fb-${ri}`);
+    if(fb){
+      if(overall==='exact'){fb.textContent='✓';fb.className='feedback exact';}
+      else if(overall==='high'){fb.textContent='↓ TOO HIGH';fb.className='feedback too-high';}
+      else{fb.textContent='↑ TOO LOW';fb.className='feedback too-low';}
+    }
+  });
+  if(!gameOver&&guesses.length<MAX_GUESSES){
+    const row=document.getElementById(`row-${guesses.length}`);
+    if(row)row.querySelectorAll('.tile').forEach(t=>t.classList.add('active-row'));
+  }
+}
+
+// ── RESULT ──
+function buildResultGrid(){
+  const el=document.getElementById('result-grid');
+  el.innerHTML=guesses.map(g=>{
+    const {result}=evaluateGuess(g);
+    return `<div class="result-row-r">${[...g].map((_,i)=>`<div class="r-tile ${result[i]}"></div>`).join('')}</div>`;
+  }).join('');
+}
+
+function showResult(){
+  buildResultGrid();
+  document.getElementById('result-icon').textContent=won?'🔢':'😤';
+  document.getElementById('result-label').textContent=won?'NUMBLE!':'BUSTED';
+  document.getElementById('result-label').className=`result-label ${won?'win':'lose'}`;
+  document.getElementById('result-number').textContent=ANSWER;
+  document.getElementById('result-category').textContent=`${todayData.category} — ${todayData.hint}`;
+  if(won){
+    document.getElementById('result-guesses').textContent=guesses.length;
+    document.getElementById('result-guesses-label').textContent=guesses.length===1?'GUESS':'GUESSES';
+  } else {
+    document.getElementById('result-guesses').textContent='—';
+    document.getElementById('result-guesses-label').textContent='BETTER LUCK TOMORROW';
+  }
+  const streak=updateStreak(won);
+  document.getElementById('comeback-txt').textContent=won?`🔥 ${streak} day streak!`:'Come back tomorrow';
+  document.getElementById('result-overlay').classList.add('show');
+}
+
+document.getElementById('giveup-btn').addEventListener('click',()=>{
+  if(gameOver)return;
+  gameOver=true;won=false;saveState();showResult();
+});
+
+document.getElementById('share-btn').addEventListener('click',()=>{
+  const emojiMap={correct:'🟩',high:'🟥',low:'🟦'};
+  const rows=guesses.map(g=>{
+    const {result}=evaluateGuess(g);
+    return [...g].map((_,i)=>emojiMap[result[i]]).join('');
+  }).join('\n');
+  const n=guesses.length;
+  const text=won
+    ?`🔢 NUMBLE\n${dateKey}\n${rows}\nGot it in ${n}/6!\n▶ https://boltarcade.github.io/BoltArcade`
+    :`🔢 NUMBLE\n${dateKey}\n${rows}\nX/6 — couldn't get it 😤\n▶ https://boltarcade.github.io/BoltArcade`;
+  if(navigator.share)navigator.share({text});
+  else navigator.clipboard.writeText(text).then(()=>alert('Copied!'));
+});
+
+// Shake animation
+const style=document.createElement('style');
+style.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';
+document.head.appendChild(style);
+
+// ── INIT ──
+buildGrid();
+buildNumpad();
+if(guesses.length>0){
+  setTimeout(()=>{
+    renderSavedGuesses();
+    if(gameOver)setTimeout(showResult,800);
+  },100);
+} else {
+  const row=document.getElementById('row-0');
+  if(row)row.querySelectorAll('.tile').forEach(t=>t.classList.add('active-row'));
+}
+</script>
+</body>
+</html>

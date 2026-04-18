@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BUCKETS — BOLT ARCADE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:#08080f;font-family:'Inter',sans-serif;color:#fff;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#page{position:relative;z-index:1;width:100%;max-width:480px;padding:0 20px 60px;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+header{display:flex;align-items:center;justify-content:space-between;width:100%;padding:20px 0 0;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;}
+.back-btn:hover{color:rgba(255,255,255,0.7);}
+.back-btn svg{width:16px;height:16px;}
+.header-logo{font-family:'Russo One',sans-serif;font-size:13px;letter-spacing:0.22em;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.daily-badge{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 10px;}
+
+.game-title{font-family:'Russo One',sans-serif;font-size:clamp(36px,10vw,56px);letter-spacing:0.12em;text-align:center;margin:20px 0 2px;background:linear-gradient(160deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.game-sub{text-align:center;font-size:12px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:6px;}
+.hint-info{text-align:center;font-size:11px;color:rgba(255,255,255,0.18);margin-bottom:16px;letter-spacing:0.05em;}
+
+/* STREAK */
+.streak-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px;font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;}
+.streak-num{font-family:'Russo One',sans-serif;font-size:18px;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* CLUE CHIP */
+.clue-wrap{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;width:100%;}
+.clue-chip{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:rgba(249,200,70,0.07);border:1px solid rgba(249,200,70,0.15);color:rgba(249,200,70,0.6);}
+
+/* GRID */
+#grid{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;width:100%;}
+.grid-row{display:flex;gap:5px;justify-content:center;}
+.tile{
+  width:52px;height:52px;
+  border:2px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Russo One',sans-serif;
+  font-size:22px;letter-spacing:0.05em;
+  text-transform:uppercase;
+  transition:border-color 0.1s, background 0.3s, transform 0.1s;
+  position:relative;
+  user-select:none;
+}
+.tile.active-row{border-color:rgba(255,255,255,0.25);}
+.tile.filled{border-color:rgba(249,200,70,0.4);animation:tilePop 0.1s ease;}
+@keyframes tilePop{0%{transform:scale(1.1);}100%{transform:scale(1);}}
+.tile.flip{animation:tileFlip 0.5s ease forwards;}
+@keyframes tileFlip{
+  0%{transform:rotateX(0);}
+  50%{transform:rotateX(-90deg);}
+  100%{transform:rotateX(0);}
+}
+.tile.correct{background:#22c55e;border-color:#22c55e;color:#fff;}
+.tile.present{background:#f9c846;border-color:#f9c846;color:#08080f;}
+.tile.absent{background:#1e1e2e;border-color:#1e1e2e;color:rgba(255,255,255,0.3);}
+/* space tile - wider */
+.tile.space-tile{width:14px;min-width:14px;background:transparent;border-color:transparent;}
+
+/* MESSAGE */
+#message{
+  height:28px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);margin-bottom:10px;
+  font-weight:600;
+}
+
+/* KEYBOARD */
+#keyboard{display:flex;flex-direction:column;gap:6px;width:100%;margin-bottom:14px;}
+.kb-row{display:flex;gap:5px;justify-content:center;}
+.kb-key{
+  height:48px;min-width:32px;flex:1;max-width:42px;
+  background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);
+  border-radius:7px;
+  font-family:'Russo One',sans-serif;font-size:13px;
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,transform 0.08s;
+  -webkit-tap-highlight-color:transparent;
+  text-transform:uppercase;
+}
+.kb-key:active{transform:scale(0.93);}
+.kb-key.wide{min-width:52px;max-width:58px;font-size:11px;}
+.kb-key.correct{background:#22c55e;border-color:#22c55e;}
+.kb-key.present{background:#f9c846;border-color:#f9c846;color:#08080f;}
+.kb-key.absent{background:#0e0e18;border-color:#0e0e18;color:rgba(255,255,255,0.2);}
+
+/* GIVE UP */
+#giveup-btn{width:100%;padding:12px;background:transparent;border:1px solid rgba(249,64,96,0.2);border-radius:12px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(249,64,96,0.4);cursor:pointer;transition:all 0.2s;}
+#giveup-btn:hover{border-color:rgba(249,64,96,0.45);color:rgba(249,64,96,0.7);}
+
+/* RESULT OVERLAY */
+#result-overlay{position:fixed;inset:0;z-index:100;background:rgba(8,8,15,0.96);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:30px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#result-overlay.show{opacity:1;pointer-events:all;}
+.result-icon{font-size:64px;margin-bottom:14px;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
+.result-label{font-family:'Russo One',sans-serif;font-size:clamp(28px,9vw,46px);letter-spacing:0.08em;text-align:center;margin-bottom:10px;}
+.result-label.win{background:linear-gradient(90deg,#f9c846,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-label.lose{background:linear-gradient(90deg,#f94060,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-answer{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
+.result-word{font-family:'Russo One',sans-serif;font-size:28px;letter-spacing:0.12em;margin-bottom:4px;text-align:center;}
+.result-team{font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px;}
+.result-guesses{font-family:'Russo One',sans-serif;font-size:44px;background:linear-gradient(90deg,#f9c846,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.result-guesses-label{font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:8px;}
+.comeback{font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:24px;}
+/* result grid */
+.result-grid{display:flex;flex-direction:column;gap:4px;margin-bottom:20px;}
+.result-row{display:flex;gap:3px;justify-content:center;}
+.r-tile{width:16px;height:16px;border-radius:3px;}
+.r-tile.correct{background:#22c55e;}
+.r-tile.present{background:#f9c846;}
+.r-tile.absent{background:#1e1e2e;}
+.r-tile.space{background:transparent;width:6px;}
+.share-btn{width:100%;max-width:320px;padding:15px;background:linear-gradient(90deg,#f9c846,#f97316);border:none;border-radius:12px;font-family:'Russo One',sans-serif;font-size:14px;letter-spacing:0.15em;color:#08080f;cursor:pointer;margin-bottom:12px;}
+.home-btn{width:100%;max-width:320px;padding:13px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);cursor:pointer;text-decoration:none;display:block;text-align:center;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="page">
+  <header>
+    <a href="index.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+      BACK
+    </a>
+    <div class="header-logo">BOLT ARCADE</div>
+    <div class="daily-badge">DAILY</div>
+  </header>
+
+  <div class="game-title">BUCKETS</div>
+  <div class="game-sub">Guess the NBA player</div>
+  <div class="hint-info">🟩 right spot &nbsp;·&nbsp; 🟨 wrong spot &nbsp;·&nbsp; ⬛ not in name</div>
+
+  <div class="streak-bar">🔥 STREAK: <span class="streak-num" id="streak-display">0</span></div>
+
+  <div class="clue-wrap" id="clue-wrap"></div>
+  <div id="grid"></div>
+  <div id="message"></div>
+  <div id="keyboard"></div>
+  <button id="giveup-btn">🏳️ GIVE UP</button>
+</div>
+
+<div id="result-overlay">
+  <div class="result-icon" id="result-icon"></div>
+  <div class="result-label" id="result-label"></div>
+  <div class="result-answer">The answer was</div>
+  <div class="result-word" id="result-word"></div>
+  <div class="result-team" id="result-team"></div>
+  <div class="result-grid" id="result-grid"></div>
+  <div class="result-guesses" id="result-guesses"></div>
+  <div class="result-guesses-label" id="result-guesses-label"></div>
+  <div class="comeback" id="comeback-txt"></div>
+  <button class="share-btn" id="share-btn">📤 SHARE RESULT</button>
+  <a href="index.html" class="home-btn">🏠 BACK TO ARCADE</a>
+</div>
+
+<script>
+// BG
+const bgC=document.getElementById('bg'),bgX=bgC.getContext('2d');let stars=[];
+function initBg(){bgC.width=innerWidth;bgC.height=innerHeight;stars=Array.from({length:80},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+0.3,a:Math.random(),s:Math.random()*0.005+0.002}));}
+function drawBg(){bgX.clearRect(0,0,bgC.width,bgC.height);stars.forEach(s=>{s.a+=s.s;if(s.a>1||s.a<0)s.s*=-1;bgX.globalAlpha=s.a*0.4;bgX.fillStyle='#f9c846';bgX.beginPath();bgX.arc(s.x,s.y,s.r,0,Math.PI*2);bgX.fill();});bgX.globalAlpha=1;requestAnimationFrame(drawBg);}
+initBg();drawBg();window.addEventListener('resize',initBg);
+
+// ── PLAYERS ──
+// Format: {name, team, clues}
+// Names use LAST NAME only for guessing (easier on mobile)
+const PLAYERS = [
+  {answer:"JAMES",    full:"LeBron James",    team:"LA Lakers",         clues:["4x NBA Champion","From Akron, Ohio","Wears #23"]},
+  {answer:"CURRY",    full:"Stephen Curry",   team:"Golden State Warriors", clues:["Greatest shooter ever","2x MVP","Wears #30"]},
+  {answer:"DURANT",   full:"Kevin Durant",    team:"Phoenix Suns",      clues:["2x Finals MVP","From DC","Wears #35"]},
+  {answer:"GIANNIS",  full:"Giannis A.",      team:"Milwaukee Bucks",   clues:["2x MVP","Greek Freak","Wears #34"]},
+  {answer:"BUTLER",   full:"Jimmy Butler",    team:"Miami Heat",        clues:["Made finals in 2020","Known for coffee","Wears #22"]},
+  {answer:"TATUM",    full:"Jayson Tatum",    team:"Boston Celtics",    clues:["2024 Finals MVP","From St. Louis","Wears #0"]},
+  {answer:"JOKIC",    full:"Nikola Jokic",    team:"Denver Nuggets",    clues:["3x MVP","The Joker","From Serbia"]},
+  {answer:"EMBIID",   full:"Joel Embiid",     team:"Philadelphia 76ers",clues:["2023 MVP","The Process","From Cameroon"]},
+  {answer:"GEORGE",   full:"Paul George",     team:"Philadelphia 76ers",clues:["Known as PG-13","Born in Palmdale","Wears #8"]},
+  {answer:"IRVING",   full:"Kyrie Irving",    team:"Dallas Mavericks",  clues:["2016 champion","Known for handles","Wears #11"]},
+  {answer:"HARDEN",   full:"James Harden",    team:"LA Clippers",       clues:["2018 MVP","Known for beard","Wears #1"]},
+  {answer:"LILLARD",  full:"Damian Lillard",  team:"Milwaukee Bucks",   clues:["Known as Dame D.O.L.L.A.","From Oakland","Wears #0"]},
+  {answer:"BOOKER",   full:"Devin Booker",    team:"Phoenix Suns",      clues:["60-point game vs Celtics","From Grand Rapids","Wears #1"]},
+  {answer:"TOWNS",    full:"Karl-Anthony Towns",team:"NY Knicks",       clues:["2016 Rookie of the Year","From New Jersey","Wears #32"]},
+  {answer:"YOUNG",    full:"Trae Young",      team:"Atlanta Hawks",     clues:["Traded for Luka","From Norman OK","Wears #11"]},
+  {answer:"DONCIC",   full:"Luka Doncic",     team:"Dallas Mavericks",  clues:["Slovenian superstar","Won EuroLeague at 18","Wears #77"]},
+  {answer:"MORANT",   full:"Ja Morant",       team:"Memphis Grizzlies", clues:["2022 MIP","From Dalzell SC","Wears #12"]},
+  {answer:"EDWARDS",  full:"Anthony Edwards", team:"Minnesota Timberwolves",clues:["2020 #1 pick","From Atlanta","Wears #5"]},
+  {answer:"BEAL",     full:"Bradley Beal",    team:"Phoenix Suns",      clues:["Former Wizard","From St. Louis","Wears #3"]},
+  {answer:"LAVINE",   full:"Zach LaVine",     team:"Chicago Bulls",     clues:["2x Dunk Contest winner","From Renton WA","Wears #8"]},
+  {answer:"GREEN",    full:"Draymond Green",  team:"Golden State Warriors",clues:["4x Champion","Known for defense","Wears #23"]},
+  {answer:"PAUL",     full:"Chris Paul",      team:"San Antonio Spurs", clues:["The Point God","From Winston-Salem","Wears #3"]},
+  {answer:"WADE",     full:"Dwyane Wade",     team:"Retired",           clues:["3x Champion","Flash","From Chicago"]},
+  {answer:"KOBE",     full:"Kobe Bryant",     team:"Retired",           clues:["5x Champion","Mamba Mentality","Wore #24"]},
+  {answer:"SHAQ",     full:"Shaquille O'Neal",team:"Retired",           clues:["4x Champion","Diesel","From Newark NJ"]},
+  {answer:"BIRD",     full:"Larry Bird",      team:"Retired",           clues:["3x Champion","Hick from French Lick","Celtics legend"]},
+  {answer:"MAGIC",    full:"Magic Johnson",   team:"Retired",           clues:["5x Champion","Showtime Lakers","From Lansing MI"]},
+  {answer:"BRON",     full:"LeBron James",    team:"LA Lakers",         clues:["King James","The Chosen One","GOAT debate"]},
+  {answer:"IVERSON",  full:"Allen Iverson",   team:"Retired",           clues:["2001 MVP","The Answer","From Hampton VA"]},
+  {answer:"PIPPEN",   full:"Scottie Pippen",  team:"Retired",           clues:["6x Champion","Robin to MJ","From Hamburg AR"]},
+];
+
+// ── EST DATE ──
+function getESTDateKey(){
+  const now=new Date();
+  const jan=new Date(now.getFullYear(),0,1).getTimezoneOffset();
+  const jul=new Date(now.getFullYear(),6,1).getTimezoneOffset();
+  const isDST=now.getTimezoneOffset()<Math.max(jan,jul);
+  const offsetMin=-5*60+(isDST?60:0);
+  const estTime=new Date(now.getTime()+(now.getTimezoneOffset()+offsetMin)*60000);
+  return estTime.toISOString().slice(0,10);
+}
+function getDayIndex(){
+  const start=new Date('2024-01-01');
+  const now=new Date(getESTDateKey());
+  return Math.floor((now-start)/(1000*60*60*24))%PLAYERS.length;
+}
+
+const todayData=PLAYERS[getDayIndex()];
+const ANSWER=todayData.answer; // what player types
+const dateKey=getESTDateKey();
+const storageKey=`buckets_${dateKey}`;
+const WORD_LEN=ANSWER.length;
+const MAX_GUESSES=6;
+
+// All valid last names for validation
+const VALID_GUESSES=PLAYERS.map(p=>p.answer).concat([
+  'JAMES','CURRY','DURANT','GIANNIS','BUTLER','TATUM','JOKIC','EMBIID',
+  'GEORGE','IRVING','HARDEN','LILLARD','BOOKER','TOWNS','YOUNG','DONCIC',
+  'MORANT','EDWARDS','BEAL','LAVINE','GREEN','PAUL','WADE','KOBE','SHAQ',
+  'BIRD','MAGIC','IVERSON','PIPPEN','ALLEN','DAVIS','INGRAM','BALL','ZION',
+  'HAYES','SIMONS','BRIDGES','MAXEY','KUMINGA','POOLE','BROWN','WHITE',
+  'SMART','HORFORD','WILLIAMS','ROZIER','HARRIS','SIMMONS','OUBRE','NANCE',
+  'CLARKSON','BOGDANOVIC','CONLEY','GOBERT','MITCHELL','SEXTON','MARKKANEN',
+  'AYTON','JOHNSON','BIYOMBO','CARTER','MASON','MONK','GORDON','PORTER',
+  'BARTON','PLUMLEE','RIVERS','LOVE','OSMAN','GARLAND','MOBLEY','ALLEN',
+  'BROGDON','HOLIDAY','MIDDLETON','LOPEZ','HILL','ANTETOKOUNMPO','NWORA',
+  'THYBULLE','DRAGIC','NUNN','HERRO','ADEBAYO','LOWRY','STRUS','MARTIN',
+  'ROSE','ROBINSON','BARRETT','BRUNSON','RANDLE','TOPPIN','FOURNIER','BURKS',
+  'QUICKLEY','HART','MILLS','BEMBRY','INGLES','BOGDANOVIC','JAZZ','INGRAM',
+  'BALL','VALANCIUNAS','GRAHAM','WILLY','HAYES','SIMONS','NASSIR','GARY',
+]);
+
+// ── STATE ──
+let guesses=[];
+let currentGuess=[];
+let gameOver=false;
+let won=false;
+const saved=localStorage.getItem(storageKey);
+if(saved){
+  const s=JSON.parse(saved);
+  guesses=s.guesses||[];gameOver=s.gameOver||false;won=s.won||false;
+}
+
+// Clue unlock thresholds
+const CLUE_AT=[0,2,4];
+
+// ── STREAK ──
+function getStreak(){return parseInt(localStorage.getItem('buckets_streak')||'0');}
+function updateStreak(w){
+  const yesterday=new Date(getESTDateKey());yesterday.setDate(yesterday.getDate()-1);
+  const yk=yesterday.toISOString().slice(0,10);
+  const lastWin=localStorage.getItem('buckets_lastwin');
+  let streak=getStreak();
+  if(w){if(lastWin===yk)streak++;else if(lastWin===dateKey){}else streak=1;localStorage.setItem('buckets_lastwin',dateKey);localStorage.setItem('buckets_streak',streak);}
+  else{localStorage.setItem('buckets_streak','0');}
+  return streak;
+}
+document.getElementById('streak-display').textContent=getStreak();
+
+// ── BUILD GRID ──
+function buildGrid(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  for(let r=0;r<MAX_GUESSES;r++){
+    const row=document.createElement('div');
+    row.className='grid-row';
+    row.id=`row-${r}`;
+    for(let c=0;c<WORD_LEN;c++){
+      const tile=document.createElement('div');
+      tile.className='tile';
+      tile.id=`tile-${r}-${c}`;
+      row.appendChild(tile);
+    }
+    grid.appendChild(row);
+  }
+}
+
+// ── BUILD KEYBOARD ──
+const KB_ROWS=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']];
+function buildKeyboard(){
+  const kb=document.getElementById('keyboard');
+  kb.innerHTML='';
+  KB_ROWS.forEach(row=>{
+    const rowEl=document.createElement('div');
+    rowEl.className='kb-row';
+    row.forEach(k=>{
+      const btn=document.createElement('div');
+      btn.className='kb-key'+(k==='ENTER'||k==='⌫'?' wide':'');
+      btn.textContent=k;
+      btn.dataset.key=k;
+      btn.addEventListener('click',()=>handleKey(k));
+      rowEl.appendChild(btn);
+    });
+    kb.appendChild(rowEl);
+  });
+}
+
+// ── EVALUATE ──
+function evaluate(guess){
+  const result=Array(WORD_LEN).fill('absent');
+  const answerArr=[...ANSWER];
+  const guessArr=[...guess];
+  // Mark correct
+  guessArr.forEach((l,i)=>{if(l===answerArr[i]){result[i]='correct';answerArr[i]=null;guessArr[i]=null;}});
+  // Mark present
+  guessArr.forEach((l,i)=>{
+    if(l===null)return;
+    const ai=answerArr.indexOf(l);
+    if(ai!==-1){result[i]='present';answerArr[ai]=null;}
+  });
+  return result;
+}
+
+// ── RENDER GUESSES ──
+function renderGuesses(){
+  guesses.forEach((g,ri)=>{
+    const result=evaluate(g);
+    [...g].forEach((letter,ci)=>{
+      const tile=document.getElementById(`tile-${ri}-${ci}`);
+      if(tile){
+        tile.textContent=letter;
+        setTimeout(()=>{
+          tile.classList.add('flip');
+          setTimeout(()=>tile.classList.add(result[ci]),250);
+        },ci*80);
+      }
+    });
+    // update keyboard
+    [...g].forEach((letter,ci)=>{
+      updateKey(letter,result[ci]);
+    });
+  });
+  // active row
+  if(!gameOver&&guesses.length<MAX_GUESSES){
+    const row=document.getElementById(`row-${guesses.length}`);
+    if(row) row.querySelectorAll('.tile').forEach(t=>t.classList.add('active-row'));
+  }
+}
+
+function updateKey(letter,state){
+  const key=document.querySelector(`.kb-key[data-key="${letter}"]`);
+  if(!key)return;
+  const priority={correct:3,present:2,absent:1};
+  const current=key.classList.contains('correct')?3:key.classList.contains('present')?2:key.classList.contains('absent')?1:0;
+  if((priority[state]||0)>current){
+    key.classList.remove('correct','present','absent');
+    key.classList.add(state);
+  }
+}
+
+// ── CLUES ──
+function renderClues(){
+  const wrongCount=guesses.length;
+  const el=document.getElementById('clue-wrap');
+  el.innerHTML=todayData.clues.filter((_,i)=>wrongCount>=CLUE_AT[i]).map(c=>`<div class="clue-chip">💡 ${c}</div>`).join('');
+}
+
+// ── CURRENT GUESS DISPLAY ──
+function renderCurrentGuess(){
+  if(gameOver)return;
+  const ri=guesses.length;
+  if(ri>=MAX_GUESSES)return;
+  for(let ci=0;ci<WORD_LEN;ci++){
+    const tile=document.getElementById(`tile-${ri}-${ci}`);
+    if(!tile)continue;
+    const letter=currentGuess[ci]||'';
+    tile.textContent=letter;
+    if(letter){tile.classList.add('filled');}else{tile.classList.remove('filled');}
+  }
+}
+
+// ── MESSAGE ──
+function showMsg(txt,dur=1500){
+  const el=document.getElementById('message');
+  el.textContent=txt;
+  if(dur>0)setTimeout(()=>{if(el.textContent===txt)el.textContent='';},dur);
+}
+
+// ── HANDLE KEY ──
+function handleKey(k){
+  if(gameOver)return;
+  if(k==='⌫'||k==='Backspace'){
+    currentGuess.pop();
+    renderCurrentGuess();
+  } else if(k==='ENTER'||k==='Enter'){
+    submitGuess();
+  } else if(/^[A-Za-z]$/.test(k)&&currentGuess.length<WORD_LEN){
+    currentGuess.push(k.toUpperCase());
+    renderCurrentGuess();
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  handleKey(e.key==='Backspace'?'⌫':e.key==='Enter'?'ENTER':e.key);
+});
+
+// ── SUBMIT ──
+function submitGuess(){
+  if(gameOver)return;
+  const guess=currentGuess.join('');
+  if(guess.length!==WORD_LEN){showMsg(`Need ${WORD_LEN} letters`);shake();return;}
+  // Validate - allow any uppercase letter combo of right length
+  // (generous validation - just check length)
+  guesses.push(guess);
+  currentGuess=[];
+  const result=evaluate(guess);
+  const ri=guesses.length-1;
+  [...guess].forEach((letter,ci)=>{
+    const tile=document.getElementById(`tile-${ri}-${ci}`);
+    if(tile){
+      tile.textContent=letter;
+      tile.classList.remove('filled','active-row');
+      setTimeout(()=>{
+        tile.classList.add('flip');
+        setTimeout(()=>tile.classList.add(result[ci]),250);
+      },ci*80);
+      setTimeout(()=>updateKey(letter,result[ci]),(ci*80)+300);
+    }
+  });
+  if(guess===ANSWER){won=true;gameOver=true;setTimeout(()=>{showMsg('BUCKETS! 🏀',0);setTimeout(showResult,1200);},WORD_LEN*80+400);}
+  else if(guesses.length>=MAX_GUESSES){gameOver=true;setTimeout(showResult,WORD_LEN*80+600);}
+  else{renderClues();}
+  saveState();
+  setTimeout(renderCurrentGuess,50);
+}
+
+function shake(){
+  const row=document.getElementById(`row-${guesses.length}`);
+  if(!row)return;
+  row.style.animation='shake 0.4s ease';
+  setTimeout(()=>row.style.animation='',400);
+}
+
+function saveState(){localStorage.setItem(storageKey,JSON.stringify({guesses,gameOver,won}));}
+
+// ── RESULT ──
+function buildResultGrid(){
+  const el=document.getElementById('result-grid');
+  el.innerHTML=guesses.map(g=>{
+    const result=evaluate(g);
+    return `<div class="result-row">${[...g].map((l,i)=>`<div class="r-tile ${result[i]}"></div>`).join('')}</div>`;
+  }).join('');
+}
+
+function showResult(){
+  buildResultGrid();
+  document.getElementById('result-icon').textContent=won?'🏀':'😤';
+  document.getElementById('result-label').textContent=won?'BUCKETS!':'BRICKED';
+  document.getElementById('result-label').className=`result-label ${won?'win':'lose'}`;
+  document.getElementById('result-word').textContent=todayData.full;
+  document.getElementById('result-team').textContent=todayData.team;
+  if(won){
+    document.getElementById('result-guesses').textContent=guesses.length;
+    document.getElementById('result-guesses-label').textContent=guesses.length===1?'GUESS':'GUESSES';
+  } else {
+    document.getElementById('result-guesses').textContent='—';
+    document.getElementById('result-guesses-label').textContent='BETTER LUCK TOMORROW';
+  }
+  const streak=updateStreak(won);
+  document.getElementById('comeback-txt').textContent=won?`🔥 ${streak} day streak!`:'Come back tomorrow';
+  document.getElementById('result-overlay').classList.add('show');
+}
+
+document.getElementById('giveup-btn').addEventListener('click',()=>{
+  if(gameOver)return;
+  gameOver=true;won=false;saveState();showResult();
+});
+
+document.getElementById('share-btn').addEventListener('click',()=>{
+  const emojiMap={correct:'🟩',present:'🟨',absent:'⬛'};
+  const rows=guesses.map(g=>{
+    const result=evaluate(g);
+    return [...g].map((_,i)=>emojiMap[result[i]]).join('');
+  }).join('\n');
+  const n=guesses.length;
+  const text=won
+    ?`🏀 BUCKETS\n${dateKey}\n${rows}\nGot it in ${n}/6!\n▶ https://boltarcade.github.io/BoltArcade`
+    :`🏀 BUCKETS\n${dateKey}\n${rows}\nX/6 — bricked it 😤\n▶ https://boltarcade.github.io/BoltArcade`;
+  if(navigator.share)navigator.share({text});
+  else navigator.clipboard.writeText(text).then(()=>alert('Copied!'));
+});
+
+// ── SHAKE ANIMATION ──
+const style=document.createElement('style');
+style.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';
+document.head.appendChild(style);
+
+// ── INIT ──
+buildGrid();
+buildKeyboard();
+renderClues();
+if(guesses.length>0){
+  setTimeout(()=>{
+    renderGuesses();
+    if(gameOver)setTimeout(showResult,1500);
+  },100);
+} else {
+  const row=document.getElementById('row-0');
+  if(row)row.querySelectorAll('.tile').forEach(t=>t.classList.add('active-row'));
+}
+</script>
+</body>
+</html>

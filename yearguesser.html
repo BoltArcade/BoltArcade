@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>YEAR GUESSER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@700;900&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{display:flex;flex-direction:column;align-items:center;justify-content:space-between;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;font-family:'Nunito',sans-serif;color:#fff;background:#0a0a14;padding:env(safe-area-inset-top,6px) 0 env(safe-area-inset-bottom,6px);height:100vh;height:100dvh;}
+#header{flex-shrink:0;width:min(96vw,500px);display:flex;align-items:center;justify-content:space-between;padding:2px 6px 0;}
+#back{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-decoration:none;min-width:50px;font-weight:700;}
+#hdc{text-align:center;}
+#title{font-family:'Russo One',sans-serif;font-size:clamp(16px,4.5vw,22px);letter-spacing:0.1em;background:linear-gradient(90deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#tagline{font-size:8px;color:rgba(255,255,255,0.2);letter-spacing:0.25em;text-transform:uppercase;}
+#hdr{min-width:50px;text-align:right;}
+#lives-disp{font-size:18px;letter-spacing:2px;}
+#game-area{flex:1 1 auto;width:min(96vw,500px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:4px 8px;min-height:0;}
+#progress-bar{width:100%;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex-shrink:0;}
+#progress-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:3px;transition:width 0.4s;}
+#round-label{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.2em;text-transform:uppercase;text-align:right;width:100%;}
+#event-card{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
+#event-emoji{font-size:clamp(40px,12vw,64px);line-height:1;}
+#event-category{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,200,80,0.6);font-weight:700;}
+#event-text{font-family:'Russo One',sans-serif;font-size:clamp(14px,4vw,19px);letter-spacing:0.05em;text-align:center;color:#fff;line-height:1.35;}
+#event-hint{font-size:clamp(9px,2.2vw,11px);color:rgba(255,255,255,0.25);letter-spacing:0.1em;text-align:center;font-style:italic;}
+#year-display{font-family:'Russo One',sans-serif;font-size:clamp(38px,11vw,58px);letter-spacing:0.08em;color:#f59e0b;text-shadow:0 0 24px rgba(245,158,11,0.4);text-align:center;flex-shrink:0;}
+#slider-wrap{width:100%;flex-shrink:0;}
+#year-slider{width:100%;-webkit-appearance:none;appearance:none;height:8px;border-radius:4px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;}
+#year-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 0 12px rgba(245,158,11,0.5);cursor:pointer;}
+#year-slider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;border:none;background:linear-gradient(135deg,#f59e0b,#ef4444);cursor:pointer;}
+#slider-labels{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px;padding:0 2px;}
+#submit-btn{width:100%;padding:14px 0;flex-shrink:0;background:linear-gradient(90deg,#f59e0b,#ef4444);border:none;border-radius:12px;color:#1a0800;font-family:'Russo One',sans-serif;font-size:clamp(14px,4vw,17px);letter-spacing:0.15em;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;touch-action:manipulation;box-shadow:0 4px 20px rgba(245,158,11,0.35);transition:transform 0.07s,opacity 0.15s;}
+#submit-btn:active{transform:scale(0.97);}
+#submit-btn:disabled{opacity:0.4;pointer-events:none;}
+#result-panel{width:100%;background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;text-align:center;flex-shrink:0;display:none;}
+#result-title{font-family:'Russo One',sans-serif;font-size:clamp(18px,5.5vw,26px);letter-spacing:0.1em;margin-bottom:4px;}
+#result-detail{font-size:clamp(11px,3vw,13px);color:rgba(255,255,255,0.5);letter-spacing:0.1em;line-height:1.6;}
+#result-pts{font-family:'Russo One',sans-serif;font-size:clamp(16px,4.5vw,22px);margin-top:6px;}
+#next-btn{margin-top:10px;width:100%;padding:12px 0;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-family:'Russo One',sans-serif;font-size:clamp(12px,3.5vw,15px);letter-spacing:0.15em;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;touch-action:manipulation;}
+#ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(5,5,12,0.96);transition:opacity 0.25s;pointer-events:auto;padding:20px;}
+#ov.hidden{opacity:0;pointer-events:none;}
+#ov-emoji{font-size:clamp(40px,12vw,60px);}
+#ov-title{font-family:'Russo One',sans-serif;font-size:clamp(24px,7vw,42px);letter-spacing:0.1em;background:linear-gradient(90deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;}
+#ov-sub{font-size:clamp(11px,3vw,14px);color:rgba(255,255,255,0.38);letter-spacing:0.08em;text-align:center;padding:0 16px;line-height:1.7;font-weight:700;}
+#ov-sub .big{font-family:'Russo One',sans-serif;font-size:clamp(20px,5.5vw,28px);color:#f59e0b;-webkit-text-fill-color:#f59e0b;vertical-align:middle;}
+#ov-play{background:linear-gradient(90deg,#f59e0b,#ef4444);border:none;border-radius:12px;color:#1a0800;font-family:'Russo One',sans-serif;font-size:clamp(14px,4vw,17px);letter-spacing:0.15em;padding:13px 44px;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;touch-action:manipulation;box-shadow:0 4px 22px rgba(245,158,11,0.4);transition:transform 0.07s;}
+#ov-play:active{transform:scale(0.95);}
+#ov-share{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:10px;color:#fff;font-family:'Russo One',sans-serif;font-size:clamp(12px,3.2vw,14px);letter-spacing:0.15em;padding:11px 32px;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;display:none;}
+#ov-copy{font-size:11px;color:#06d6a0;letter-spacing:0.15em;display:none;}
+</style>
+</head>
+<body>
+<div id="header">
+  <a id="back" href="index.html">← ARCADE</a>
+  <div id="hdc"><div id="title">📅 YEAR GUESSER</div><div id="tagline">what year did it happen?</div></div>
+  <div id="hdr"><div id="lives-disp">❤️❤️❤️</div></div>
+</div>
+<div id="game-area">
+  <div id="round-label">ROUND 1 / 10</div>
+  <div id="progress-bar"><div id="progress-fill" style="width:10%"></div></div>
+  <div id="event-card">
+    <div id="event-emoji">📅</div>
+    <div id="event-category">HISTORY</div>
+    <div id="event-text">Loading...</div>
+    <div id="event-hint"></div>
+  </div>
+  <div id="year-display">1990</div>
+  <div id="slider-wrap">
+    <input type="range" id="year-slider" min="1900" max="2024" value="1990" step="1">
+    <div id="slider-labels"><span>1900</span><span>2024</span></div>
+  </div>
+  <button id="submit-btn" type="button">📅 SUBMIT YEAR</button>
+  <div id="result-panel">
+    <div id="result-title"></div>
+    <div id="result-detail"></div>
+    <div id="result-pts"></div>
+    <button id="next-btn" type="button">NEXT →</button>
+  </div>
+</div>
+<div id="ov">
+  <div id="ov-emoji">📅</div>
+  <div id="ov-title">YEAR GUESSER</div>
+  <div id="ov-sub">READ THE EVENT<br>GUESS WHAT YEAR IT HAPPENED<br>10 EVENTS · 3 LIVES</div>
+  <button id="ov-play" type="button">▶ START</button>
+  <button id="ov-share" type="button">📤 SHARE RESULT</button>
+  <div id="ov-copy">✅ COPIED!</div>
+</div>
+<script>
+(function(){
+'use strict';
+var EVENTS=[
+  {emoji:'🌍',cat:'HISTORY',text:'World War II ended',hint:'VE Day & VJ Day both this year',year:1945},
+  {emoji:'🌕',cat:'SCIENCE',text:'Neil Armstrong walked on the Moon',hint:'Apollo 11 mission',year:1969},
+  {emoji:'📱',cat:'TECH',text:'Apple released the first iPhone',hint:'Steve Jobs announced it live',year:2007},
+  {emoji:'🧱',cat:'HISTORY',text:'The Berlin Wall fell',hint:'End of the Cold War era',year:1989},
+  {emoji:'🌐',cat:'TECH',text:'The World Wide Web was invented',hint:'Tim Berners-Lee at CERN',year:1991},
+  {emoji:'🎮',cat:'GAMING',text:'Nintendo released the original Game Boy',hint:'Handheld gaming revolution',year:1989},
+  {emoji:'🦖',cat:'POP CULTURE',text:'Jurassic Park was released in theaters',hint:'Spielberg directed it',year:1993},
+  {emoji:'🏀',cat:'SPORTS',text:'Michael Jordan won his first NBA Championship',hint:'Chicago Bulls vs Lakers',year:1991},
+  {emoji:'🎵',cat:'MUSIC',text:'Thriller by Michael Jackson was released',hint:'Best selling album of all time',year:1982},
+  {emoji:'🌐',cat:'TECH',text:'Google was founded',hint:'Started in a garage',year:1998},
+  {emoji:'📺',cat:'POP CULTURE',text:'The Simpsons first aired on TV',hint:'Longest running animated show',year:1989},
+  {emoji:'🚀',cat:'SCIENCE',text:'SpaceX launched its first Falcon 9 rocket',hint:'Elon Musk\'s company',year:2010},
+  {emoji:'🤳',cat:'TECH',text:'Instagram was launched',hint:'Photo sharing app',year:2010},
+  {emoji:'🎬',cat:'POP CULTURE',text:'Titanic became the highest grossing film',hint:'James Cameron directed',year:1997},
+  {emoji:'🏆',cat:'SPORTS',text:'LeBron James was drafted 1st overall',hint:'Cleveland Cavaliers picked him',year:2003},
+  {emoji:'🦠',cat:'HISTORY',text:'COVID-19 pandemic declared global emergency',hint:'WHO announced it',year:2020},
+  {emoji:'🌍',cat:'HISTORY',text:'The Euro became the official currency of the European Union',hint:'12 countries adopted it',year:2002},
+  {emoji:'🎵',cat:'MUSIC',text:'Spotify launched to the public',hint:'Swedish streaming service',year:2008},
+  {emoji:'📱',cat:'TECH',text:'Facebook was founded by Mark Zuckerberg',hint:'Started at Harvard',year:2004},
+  {emoji:'🎬',cat:'POP CULTURE',text:'The Matrix was released',hint:'Keanu Reeves stars',year:1999},
+  {emoji:'🏀',cat:'SPORTS',text:'Kobe Bryant scored 81 points in one game',hint:'Second highest single game score ever',year:2006},
+  {emoji:'🎮',cat:'GAMING',text:'Minecraft was officially released',hint:'Created by Notch',year:2011},
+  {emoji:'🌍',cat:'HISTORY',text:'Nelson Mandela became President of South Africa',hint:'First Black president there',year:1994},
+  {emoji:'🚀',cat:'SCIENCE',text:'Hubble Space Telescope launched',hint:'Took famous deep field photos',year:1990},
+  {emoji:'🎵',cat:'MUSIC',text:'Beyoncé released Lemonade',hint:'Visual album',year:2016},
+  {emoji:'📱',cat:'TECH',text:'TikTok launched globally',hint:'ByteDance app',year:2018},
+  {emoji:'🏈',cat:'SPORTS',text:'Tom Brady won his first Super Bowl',hint:'Patriots vs Rams',year:2002},
+  {emoji:'🎬',cat:'POP CULTURE',text:'Avatar became the highest grossing film ever',hint:'James Cameron again',year:2009},
+  {emoji:'🌍',cat:'HISTORY',text:'Barack Obama became US President',hint:'First African American president',year:2009},
+  {emoji:'🎮',cat:'GAMING',text:'Fortnite Battle Royale mode launched',hint:'Epic Games',year:2017},
+];
+var lives=3,score=0,round=1,totalRounds=10,gs='idle',currentEvent=null,usedIdx=[],answered=false;
+var slider=document.getElementById('year-slider');
+var yearDisplay=document.getElementById('year-display');
+slider.addEventListener('input',function(){yearDisplay.textContent=slider.value;});
+function updLives(){var h='';for(var i=0;i<3;i++)h+=(i<lives?'❤️':'🖤');document.getElementById('lives-disp').textContent=h;}
+function loadEvent(){
+  answered=false;
+  var pool=[];for(var i=0;i<EVENTS.length;i++)if(usedIdx.indexOf(i)===-1)pool.push(i);
+  if(pool.length===0){usedIdx=[];pool=EVENTS.map(function(_,i){return i;});}
+  var idx=pool[Math.floor(Math.random()*pool.length)];usedIdx.push(idx);
+  currentEvent=EVENTS[idx];
+  document.getElementById('event-emoji').textContent=currentEvent.emoji;
+  document.getElementById('event-category').textContent=currentEvent.cat;
+  document.getElementById('event-text').textContent=currentEvent.text;
+  document.getElementById('event-hint').textContent='💡 '+currentEvent.hint;
+  document.getElementById('round-label').textContent='ROUND '+round+' / '+totalRounds;
+  document.getElementById('progress-fill').style.width=((round-1)/totalRounds*100)+'%';
+  slider.value=1970;yearDisplay.textContent='1970';
+  document.getElementById('submit-btn').style.display='block';
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('result-panel').style.display='none';
+}
+document.getElementById('submit-btn').addEventListener('click',function(){
+  if(answered||!currentEvent||gs!=='run')return;
+  answered=true;document.getElementById('submit-btn').disabled=true;
+  var guess=parseInt(slider.value);
+  var actual=currentEvent.year;
+  var diff=Math.abs(guess-actual);
+  var pts=0,grade='',gradeCol='#fff';
+  if(diff===0){pts=500;grade='EXACT! 🎯';gradeCol='#f59e0b';}
+  else if(diff<=2){pts=400;grade='SO CLOSE! 🔥';gradeCol='#f97316';}
+  else if(diff<=5){pts=250;grade='NICE! 👍';gradeCol='#63caff';}
+  else if(diff<=10){pts=100;grade='NOT BAD';gradeCol='#a78bfa';}
+  else if(diff<=20){pts=30;grade='WAY OFF';gradeCol='rgba(255,255,255,0.4)';}
+  else{pts=0;grade='NOT EVEN CLOSE 😅';gradeCol='#ef4444';lives--;updLives();}
+  score+=pts;
+  var panel=document.getElementById('result-panel');panel.style.display='block';
+  var rt=document.getElementById('result-title');rt.textContent=grade;rt.style.color=gradeCol;
+  document.getElementById('result-detail').textContent='Actual year: '+actual+'  ·  Your guess: '+guess+'\n'+(diff===0?'Perfect!':diff+' year'+(diff===1?'':'s')+' off');
+  var ptsEl=document.getElementById('result-pts');ptsEl.textContent=pts>0?'+'+pts+' pts':'No points';ptsEl.style.color=pts>0?'#f59e0b':'#ef4444';
+  if(lives<=0){setTimeout(endGame,1200);}else if(round>=totalRounds){setTimeout(endGame,1200);}
+});
+document.getElementById('next-btn').addEventListener('click',function(){
+  if(lives<=0||round>=totalRounds){endGame();return;}
+  round++;loadEvent();
+});
+function endGame(){
+  gs='done';var won=lives>0;
+  document.getElementById('ov-emoji').textContent=won?'🏆':'📅';
+  document.getElementById('ov-title').textContent=won?'HISTORIAN!':'TIMELESS!';
+  document.getElementById('ov-sub').innerHTML='SCORE &nbsp;<span class="big">'+score+'</span><br>'+(won?'You know your history!':'Study up!');
+  document.getElementById('ov-play').textContent='PLAY AGAIN';
+  var sb=document.getElementById('ov-share');sb.style.display='block';
+  sb.onclick=function(){
+    var txt='📅 YEAR GUESSER\nScore: '+score+'\n▶ https://boltarcade.github.io/BoltArcade';
+    if(navigator.share){navigator.share({text:txt});}
+    else{navigator.clipboard.writeText(txt).then(function(){var t=document.getElementById('ov-copy');t.style.display='block';setTimeout(function(){t.style.display='none';},2000);});}
+  };
+  document.getElementById('ov').classList.remove('hidden');
+}
+function startGame(){
+  lives=3;score=0;round=1;usedIdx=[];answered=false;gs='run';
+  updLives();document.getElementById('ov-share').style.display='none';document.getElementById('ov-copy').style.display='none';
+  document.getElementById('ov').classList.add('hidden');loadEvent();
+}
+document.getElementById('ov-play').addEventListener('click',startGame);
+document.getElementById('ov-play').addEventListener('touchend',function(e){e.preventDefault();startGame();});
+}());
+</script>
+</body>
+</html>
