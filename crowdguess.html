@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CROWD GUESS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@700;900&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{display:flex;flex-direction:column;align-items:center;justify-content:space-between;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;font-family:'Nunito',sans-serif;color:#fff;background:#0a0814;padding:env(safe-area-inset-top,6px) 0 env(safe-area-inset-bottom,6px);height:100vh;height:100dvh;}
+#header{flex-shrink:0;width:min(96vw,500px);display:flex;align-items:center;justify-content:space-between;padding:2px 6px 0;}
+#back{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-decoration:none;min-width:50px;font-weight:700;}
+#hdc{text-align:center;}
+#title{font-family:'Russo One',sans-serif;font-size:clamp(16px,4.5vw,22px);letter-spacing:0.1em;background:linear-gradient(90deg,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#tagline{font-size:8px;color:rgba(255,255,255,0.2);letter-spacing:0.25em;text-transform:uppercase;}
+#hdr{min-width:50px;text-align:right;}
+#lives-disp{font-size:18px;letter-spacing:2px;}
+#game-area{flex:1 1 auto;width:min(96vw,500px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:4px 8px;min-height:0;}
+#progress-bar{width:100%;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex-shrink:0;}
+#progress-fill{height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:3px;transition:width 0.4s;}
+#round-label{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.2em;text-transform:uppercase;text-align:right;width:100%;}
+#crowd-card{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+#crowd-emoji{font-size:clamp(44px,13vw,70px);line-height:1;}
+#crowd-name{font-family:'Russo One',sans-serif;font-size:clamp(15px,4.5vw,20px);letter-spacing:0.08em;text-align:center;}
+#crowd-desc{font-size:clamp(10px,2.8vw,12px);color:rgba(255,255,255,0.35);letter-spacing:0.08em;text-align:center;}
+#crowd-hint{font-size:clamp(9px,2.2vw,11px);color:rgba(255,200,80,0.5);letter-spacing:0.1em;text-align:center;font-style:italic;}
+#count-display{font-family:'Russo One',sans-serif;font-size:clamp(28px,8vw,46px);letter-spacing:0.05em;color:#8b5cf6;text-shadow:0 0 20px rgba(139,92,246,0.4);text-align:center;flex-shrink:0;}
+#slider-wrap{width:100%;flex-shrink:0;}
+#crowd-slider{width:100%;-webkit-appearance:none;appearance:none;height:8px;border-radius:4px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;}
+#crowd-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#3b82f6);box-shadow:0 0 12px rgba(139,92,246,0.5);cursor:pointer;}
+#crowd-slider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;border:none;background:linear-gradient(135deg,#8b5cf6,#3b82f6);cursor:pointer;}
+#slider-labels{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px;padding:0 2px;}
+#submit-btn{width:100%;padding:14px 0;flex-shrink:0;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border:none;border-radius:12px;color:#fff;font-family:'Russo One',sans-serif;font-size:clamp(14px,4vw,17px);letter-spacing:0.15em;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;touch-action:manipulation;box-shadow:0 4px 20px rgba(139,92,246,0.35);transition:transform 0.07s,opacity 0.15s;}
+#submit-btn:active{transform:scale(0.97);}
+#submit-btn:disabled{opacity:0.4;pointer-events:none;}
+#result-panel{width:100%;background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;text-align:center;flex-shrink:0;display:none;}
+#result-title{font-family:'Russo One',sans-serif;font-size:clamp(18px,5.5vw,26px);letter-spacing:0.1em;margin-bottom:4px;}
+#result-detail{font-size:clamp(11px,3vw,13px);color:rgba(255,255,255,0.5);letter-spacing:0.1em;line-height:1.6;}
+#result-pts{font-family:'Russo One',sans-serif;font-size:clamp(16px,4.5vw,22px);margin-top:6px;}
+#next-btn{margin-top:10px;width:100%;padding:12px 0;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-family:'Russo One',sans-serif;font-size:clamp(12px,3.5vw,15px);letter-spacing:0.15em;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;touch-action:manipulation;}
+#ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(5,4,12,0.96);transition:opacity 0.25s;pointer-events:auto;padding:20px;}
+#ov.hidden{opacity:0;pointer-events:none;}
+#ov-emoji{font-size:clamp(40px,12vw,60px);}
+#ov-title{font-family:'Russo One',sans-serif;font-size:clamp(24px,7vw,42px);letter-spacing:0.1em;background:linear-gradient(90deg,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;}
+#ov-sub{font-size:clamp(11px,3vw,14px);color:rgba(255,255,255,0.38);letter-spacing:0.08em;text-align:center;padding:0 16px;line-height:1.7;font-weight:700;}
+#ov-sub .big{font-family:'Russo One',sans-serif;font-size:clamp(20px,5.5vw,28px);color:#8b5cf6;-webkit-text-fill-color:#8b5cf6;vertical-align:middle;}
+#ov-play{background:linear-gradient(90deg,#8b5cf6,#3b82f6);border:none;border-radius:12px;color:#fff;font-family:'Russo One',sans-serif;font-size:clamp(14px,4vw,17px);letter-spacing:0.15em;padding:13px 44px;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;touch-action:manipulation;box-shadow:0 4px 22px rgba(139,92,246,0.4);transition:transform 0.07s;}
+#ov-play:active{transform:scale(0.95);}
+#ov-share{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:10px;color:#fff;font-family:'Russo One',sans-serif;font-size:clamp(12px,3.2vw,14px);letter-spacing:0.15em;padding:11px 32px;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;display:none;}
+#ov-copy{font-size:11px;color:#06d6a0;letter-spacing:0.15em;display:none;}
+</style>
+</head>
+<body>
+<div id="header">
+  <a id="back" href="index.html">← ARCADE</a>
+  <div id="hdc"><div id="title">👥 CROWD GUESS</div><div id="tagline">how many people?</div></div>
+  <div id="hdr"><div id="lives-disp">❤️❤️❤️</div></div>
+</div>
+<div id="game-area">
+  <div id="round-label">ROUND 1 / 10</div>
+  <div id="progress-bar"><div id="progress-fill" style="width:10%"></div></div>
+  <div id="crowd-card">
+    <div id="crowd-emoji">👥</div>
+    <div id="crowd-name">Loading...</div>
+    <div id="crowd-desc"></div>
+    <div id="crowd-hint"></div>
+  </div>
+  <div id="count-display">0</div>
+  <div id="slider-wrap">
+    <input type="range" id="crowd-slider" min="0" max="100" value="30" step="1">
+    <div id="slider-labels"><span>0</span><span id="sl-max">100,000</span></div>
+  </div>
+  <button id="submit-btn" type="button">👥 SUBMIT GUESS</button>
+  <div id="result-panel">
+    <div id="result-title"></div>
+    <div id="result-detail"></div>
+    <div id="result-pts"></div>
+    <button id="next-btn" type="button">NEXT →</button>
+  </div>
+</div>
+<div id="ov">
+  <div id="ov-emoji">👥</div>
+  <div id="ov-title">CROWD GUESS</div>
+  <div id="ov-sub">HOW MANY PEOPLE?<br>GUESS THE CROWD SIZE<br>10 ROUNDS · 3 LIVES</div>
+  <button id="ov-play" type="button">▶ START</button>
+  <button id="ov-share" type="button">📤 SHARE RESULT</button>
+  <div id="ov-copy">✅ COPIED!</div>
+</div>
+<script>
+(function(){
+'use strict';
+function fmt(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return Math.round(n/1000)+'K';return n.toString();}
+var CROWDS=[
+  {emoji:'🏟️',name:'Super Bowl Audience',desc:'People watching Super Bowl LVII on TV',hint:'US TV viewers only',count:113000000,max:200000000},
+  {emoji:'⚽',name:'FIFA World Cup Final',desc:'Live attendance at the 2022 World Cup Final',hint:'Qatar stadium',count:88966,max:200000},
+  {emoji:'🏀',name:'NBA Finals Game 7',desc:'Live in-arena attendance',hint:'Average NBA arena',count:19000,max:40000},
+  {emoji:'🎸',name:'Woodstock 1969',desc:'People who attended the original festival',hint:'3 days of music',count:400000,max:1000000},
+  {emoji:'🎤',name:'Coachella Daily Attendance',desc:'People per day at Coachella Valley Music Festival',hint:'Each of the 3 days',count:125000,max:300000},
+  {emoji:'🏈',name:'College Football Stadium',desc:'Capacity of Michigan Stadium (The Big House)',hint:'Largest US football stadium',count:107601,max:200000},
+  {emoji:'🌆',name:'Times Square New Year\'s Eve',desc:'People packed into Times Square on NYE',hint:'New York City',count:58000,max:200000},
+  {emoji:'🎆',name:'Macy\'s Thanksgiving Parade',desc:'People lining the NYC parade route',hint:'Annual NYC event',count:3500000,max:10000000},
+  {emoji:'🏃',name:'NYC Marathon',desc:'Runners who complete the NYC Marathon',hint:'Annual race',count:50000,max:150000},
+  {emoji:'🎓',name:'Harvard University',desc:'Total enrolled students at Harvard',hint:'Undergrad + grad',count:21000,max:60000},
+  {emoji:'🏰',name:'Disney World Daily Visitors',desc:'Average daily visitors to Magic Kingdom',hint:'Most visited theme park',count:57000,max:150000},
+  {emoji:'✈️',name:'LAX Airport Daily Passengers',desc:'Passengers through LAX on a typical day',hint:'Los Angeles airport',count:75000,max:200000},
+  {emoji:'🏖️',name:'Coney Island Summer Day',desc:'People at Coney Island on a hot summer weekend',hint:'Brooklyn, New York',count:1000000,max:3000000},
+  {emoji:'🎭',name:'Broadway Shows Per Year',desc:'Total audience for all Broadway shows in a season',hint:'NYC theater district',count:12300000,max:30000000},
+  {emoji:'🌎',name:'NYC Population',desc:'Total population of New York City',hint:'All 5 boroughs',count:8300000,max:20000000},
+  {emoji:'🏟️',name:'Yankee Stadium Capacity',desc:'Maximum seats at Yankee Stadium',hint:'Bronx, New York',count:46537,max:100000},
+  {emoji:'🎵',name:'Madison Square Garden',desc:'Capacity for a concert at MSG',hint:'NYC arena',count:20000,max:50000},
+  {emoji:'🏉',name:'Super Bowl Live Attendance',desc:'People in the stadium for Super Bowl',hint:'Not TV viewers',count:67827,max:150000},
+  {emoji:'🎪',name:'State Fair Attendance',desc:'Total visitors to Texas State Fair',hint:'Annual fair',count:2500000,max:6000000},
+  {emoji:'🌐',name:'People Online Right Now',desc:'Approximate internet users online simultaneously',hint:'Global estimate',count:5400000000,max:10000000000},
+];
+var lives=3,score=0,round=1,totalRounds=10,gs='idle',currentCrowd=null,usedIdx=[],answered=false;
+var slider=document.getElementById('crowd-slider');
+var countDisplay=document.getElementById('count-display');
+var currentMax=100000;
+function sliderToCount(pct){return Math.round(currentMax*Math.pow(pct/100,2.2));}
+function updateDisplay(){countDisplay.textContent=fmt(sliderToCount(parseFloat(slider.value)));}
+slider.addEventListener('input',updateDisplay);
+function setupSlider(item){
+  currentMax=item.max;slider.value=25;
+  document.getElementById('sl-max').textContent=fmt(item.max);
+  updateDisplay();
+}
+function updLives(){var h='';for(var i=0;i<3;i++)h+=(i<lives?'❤️':'🖤');document.getElementById('lives-disp').textContent=h;}
+function loadCrowd(){
+  answered=false;
+  var pool=[];for(var i=0;i<CROWDS.length;i++)if(usedIdx.indexOf(i)===-1)pool.push(i);
+  if(pool.length===0){usedIdx=[];pool=CROWDS.map(function(_,i){return i;});}
+  var idx=pool[Math.floor(Math.random()*pool.length)];usedIdx.push(idx);
+  currentCrowd=CROWDS[idx];
+  document.getElementById('crowd-emoji').textContent=currentCrowd.emoji;
+  document.getElementById('crowd-name').textContent=currentCrowd.name;
+  document.getElementById('crowd-desc').textContent=currentCrowd.desc;
+  document.getElementById('crowd-hint').textContent='💡 '+currentCrowd.hint;
+  document.getElementById('round-label').textContent='ROUND '+round+' / '+totalRounds;
+  document.getElementById('progress-fill').style.width=((round-1)/totalRounds*100)+'%';
+  setupSlider(currentCrowd);
+  document.getElementById('submit-btn').style.display='block';
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('result-panel').style.display='none';
+}
+document.getElementById('submit-btn').addEventListener('click',function(){
+  if(answered||!currentCrowd||gs!=='run')return;
+  answered=true;document.getElementById('submit-btn').disabled=true;
+  var guess=sliderToCount(parseFloat(slider.value));
+  var actual=currentCrowd.count;
+  var pct=Math.abs(guess-actual)/actual;
+  var over=guess>actual*1.5;
+  var pts=0,grade='',gradeCol='#fff';
+  if(pct<=0.05){pts=500;grade='PERFECT! 🎯';gradeCol='#8b5cf6';}
+  else if(pct<=0.15){pts=350;grade='SO CLOSE! 🔥';gradeCol='#3b82f6';}
+  else if(pct<=0.30){pts=200;grade='NICE! 👍';gradeCol='#63caff';}
+  else if(pct<=0.60){pts=75;grade='NOT BAD';gradeCol='#a78bfa';}
+  else if(over){pts=0;grade='WAY TOO HIGH ❌';gradeCol='#ef4444';lives--;updLives();}
+  else{pts=20;grade:'WAY OFF';gradeCol='rgba(255,255,255,0.4)';pts=20;grade='WAY OFF';}
+  score+=pts;
+  var panel=document.getElementById('result-panel');panel.style.display='block';
+  var rt=document.getElementById('result-title');rt.textContent=grade;rt.style.color=gradeCol;
+  document.getElementById('result-detail').textContent='Actual: '+fmt(actual)+'  ·  Your guess: '+fmt(guess);
+  var ptsEl=document.getElementById('result-pts');ptsEl.textContent=pts>0?'+'+pts+' pts':'No points';ptsEl.style.color=pts>0?'#8b5cf6':'#ef4444';
+  if(lives<=0){setTimeout(endGame,1200);}else if(round>=totalRounds){setTimeout(endGame,1200);}
+});
+document.getElementById('next-btn').addEventListener('click',function(){
+  if(lives<=0||round>=totalRounds){endGame();return;}
+  round++;loadCrowd();
+});
+function endGame(){
+  gs='done';var won=lives>0;
+  document.getElementById('ov-emoji').textContent=won?'🏆':'👥';
+  document.getElementById('ov-title').textContent=won?'CROWD COUNTER!':'LOST IN THE CROWD!';
+  document.getElementById('ov-sub').innerHTML='SCORE &nbsp;<span class="big">'+score+'</span><br>'+(won?'You can count a crowd!':'Better luck next time!');
+  document.getElementById('ov-play').textContent='PLAY AGAIN';
+  var sb=document.getElementById('ov-share');sb.style.display='block';
+  sb.onclick=function(){
+    var txt='👥 CROWD GUESS\nScore: '+score+'\nPlay at boltgame.netlify.app';
+    if(navigator.share){navigator.share({text:txt});}
+    else{navigator.clipboard.writeText(txt).then(function(){var t=document.getElementById('ov-copy');t.style.display='block';setTimeout(function(){t.style.display='none';},2000);});}
+  };
+  document.getElementById('ov').classList.remove('hidden');
+}
+function startGame(){
+  lives=3;score=0;round=1;usedIdx=[];answered=false;gs='run';
+  updLives();document.getElementById('ov-share').style.display='none';document.getElementById('ov-copy').style.display='none';
+  document.getElementById('ov').classList.add('hidden');loadCrowd();
+}
+document.getElementById('ov-play').addEventListener('click',startGame);
+document.getElementById('ov-play').addEventListener('touchend',function(e){e.preventDefault();startGame();});
+}());
+</script>
+</body>
+</html>
