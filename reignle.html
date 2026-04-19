@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>REIGNLE — BOLT ARCADE</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#F5C518;--orange:#FF4D00;--red:#E8003D;--dark:#0A0A0A;--dark2:#111;--dark3:#1A1A1A;--border:rgba(255,255,255,0.07);--muted:rgba(255,255,255,0.38);}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;}
+body{min-height:100vh;background:var(--dark);font-family:'Barlow',sans-serif;color:#fff;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#page{position:relative;z-index:1;width:100%;max-width:480px;padding:0 18px 60px;display:flex;flex-direction:column;}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 0;}
+.back-btn{display:flex;align-items:center;gap:5px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.back-btn:hover{color:#fff;}
+.back-btn svg{width:14px;height:14px;}
+.header-logo{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;letter-spacing:0.15em;color:var(--gold);}
+.daily-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;background:var(--gold);color:var(--dark);padding:2px 8px;border-radius:1px;}
+
+/* TITLE */
+.game-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,11vw,60px);font-weight:900;letter-spacing:0.04em;text-align:center;margin:22px 0 2px;text-transform:uppercase;color:#fff;}
+.game-title em{font-style:normal;color:var(--gold);}
+.game-sub{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+
+/* STREAK */
+.streak-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
+.streak-num{font-size:20px;font-weight:900;color:var(--gold);}
+
+/* BELT CARD */
+.belt-card{
+  background:var(--dark2);
+  border:1px solid var(--border);
+  border-top:3px solid var(--gold);
+  border-radius:0 0 4px 4px;
+  padding:20px 18px;
+  margin-bottom:16px;
+  text-align:center;
+}
+.belt-emoji{font-size:48px;margin-bottom:10px;display:block;}
+.belt-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(18px,5vw,24px);font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.belt-days{font-family:'Barlow Condensed',sans-serif;font-size:clamp(42px,12vw,64px);font-weight:900;letter-spacing:0.02em;line-height:1;color:#fff;margin-bottom:2px;}
+.belt-days-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.belt-era{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;background:var(--dark3);border:1px solid var(--border);color:var(--muted);padding:3px 10px;border-radius:1px;}
+
+/* GUESS COUNT */
+.guess-count{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.guess-count span{font-size:16px;font-weight:900;color:var(--gold);}
+
+/* CLUES */
+.clues-wrap{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.clue-row{
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--dark2);border:1px solid var(--border);border-left:3px solid var(--gold);
+  border-radius:0 3px 3px 0;padding:8px 12px;
+  animation:clueIn 0.3s ease both;
+}
+@keyframes clueIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+.clue-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.clue-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.04em;color:#fff;line-height:1.3;}
+.clue-label{font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
+
+/* GUESS HISTORY */
+.guess-history{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;max-height:140px;overflow-y:auto;}
+.g-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 12px;border-radius:3px;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  animation:slideIn 0.2s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+.g-row.wrong{background:rgba(232,0,61,0.1);border:1px solid rgba(232,0,61,0.2);color:#f94060;}
+.g-row.correct{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.22);color:#22c55e;}
+
+/* INPUT */
+.input-wrap{position:relative;margin-bottom:10px;}
+#guess-input{
+  width:100%;background:var(--dark2);border:2px solid var(--border);border-radius:3px;
+  padding:14px 16px;font-size:15px;font-family:'Barlow',sans-serif;color:#fff;outline:none;
+  transition:border-color 0.2s;
+}
+#guess-input:focus{border-color:rgba(245,197,24,0.5);}
+#guess-input::placeholder{color:rgba(255,255,255,0.2);}
+.autocomplete{position:absolute;top:100%;left:0;right:0;background:#1a1a1a;border:1px solid var(--border);border-radius:3px;overflow:hidden;z-index:10;max-height:200px;overflow-y:auto;display:none;}
+.autocomplete.show{display:block;}
+.auto-item{padding:11px 16px;font-size:14px;font-family:'Barlow',sans-serif;cursor:pointer;transition:background 0.12s;border-bottom:1px solid rgba(255,255,255,0.04);}
+.auto-item:hover,.auto-item.selected{background:rgba(245,197,24,0.08);color:var(--gold);}
+
+/* BUTTONS */
+#submit-btn{
+  width:100%;padding:14px;
+  background:var(--gold);border:none;border-radius:3px;
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dark);cursor:pointer;transition:background 0.1s,transform 0.08s;
+}
+#submit-btn:active{transform:scale(0.97);}
+#giveup-btn{
+  width:100%;padding:11px;margin-top:8px;
+  background:transparent;border:1px solid rgba(232,0,61,0.2);border-radius:3px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+  color:rgba(232,0,61,0.4);cursor:pointer;transition:all 0.2s;
+}
+#giveup-btn:hover{border-color:rgba(232,0,61,0.5);color:rgba(232,0,61,0.7);}
+
+/* RESULT */
+#result-overlay{position:fixed;inset:0;z-index:100;background:rgba(10,10,10,0.97);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;opacity:0;pointer-events:none;transition:opacity 0.3s;overflow-y:auto;}
+#result-overlay.show{opacity:1;pointer-events:all;}
+.r-icon{font-size:60px;margin-bottom:12px;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
+.r-label{font-family:'Barlow Condensed',sans-serif;font-size:clamp(28px,9vw,46px);font-weight:900;letter-spacing:0.06em;text-transform:uppercase;text-align:center;margin-bottom:14px;}
+.r-label.win{color:var(--gold);}
+.r-label.lose{color:var(--red);}
+.r-answer-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.r-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;text-align:center;}
+.r-belt{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;color:var(--gold);margin-bottom:16px;text-align:center;}
+.r-guesses{font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:900;color:var(--gold);margin-bottom:2px;}
+.r-guesses-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.r-streak{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;color:var(--muted);margin-bottom:24px;}
+.share-btn{width:100%;max-width:320px;padding:14px;background:var(--gold);border:none;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:var(--dark);cursor:pointer;margin-bottom:10px;}
+.home-btn{width:100%;max-width:320px;padding:12px;background:transparent;border:1px solid var(--border);border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);cursor:pointer;text-decoration:none;display:block;text-align:center;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="page">
+  <header>
+    <a href="index.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+      BACK
+    </a>
+    <div class="header-logo">BOLT ARCADE</div>
+    <div class="daily-badge">DAILY</div>
+  </header>
+
+  <div class="game-title">REIGN<em>LE</em></div>
+  <div class="game-sub">Guess the champion</div>
+  <div class="streak-bar">🔥 STREAK: <span class="streak-num" id="streak-display">0</span></div>
+
+  <div class="belt-card">
+    <span class="belt-emoji" id="belt-emoji">🏆</span>
+    <div class="belt-title" id="belt-title">Loading...</div>
+    <div class="belt-days" id="belt-days">—</div>
+    <div class="belt-days-label">DAYS AS CHAMPION</div>
+    <div class="belt-era" id="belt-era">Era</div>
+  </div>
+
+  <div class="guess-count">GUESSES: <span id="guess-count-num">0</span></div>
+  <div class="clues-wrap" id="clues-wrap"></div>
+  <div class="guess-history" id="guess-history"></div>
+
+  <div class="input-wrap">
+    <input id="guess-input" type="text" placeholder="Type a wrestler's name..." autocomplete="off" spellcheck="false">
+    <div class="autocomplete" id="autocomplete"></div>
+  </div>
+  <button id="submit-btn">SUBMIT GUESS</button>
+  <button id="giveup-btn">🏳️ GIVE UP</button>
+</div>
+
+<div id="result-overlay">
+  <div class="r-icon" id="r-icon"></div>
+  <div class="r-label" id="r-label"></div>
+  <div class="r-answer-label">The champion was</div>
+  <div class="r-name" id="r-name"></div>
+  <div class="r-belt" id="r-belt"></div>
+  <div class="r-guesses" id="r-guesses"></div>
+  <div class="r-guesses-label" id="r-guesses-label"></div>
+  <div class="r-streak" id="r-streak"></div>
+  <button class="share-btn" id="share-btn">📤 SHARE RESULT</button>
+  <a href="index.html" class="home-btn">🏠 BACK TO ARCADE</a>
+</div>
+
+<script>
+// BG
+const bgC=document.getElementById('bg'),bgX=bgC.getContext('2d');let stars=[];
+function initBg(){bgC.width=innerWidth;bgC.height=innerHeight;stars=Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+0.3,a:Math.random(),s:Math.random()*0.004+0.002}));}
+function drawBg(){bgX.clearRect(0,0,bgC.width,bgC.height);stars.forEach(s=>{s.a+=s.s;if(s.a>1||s.a<0)s.s*=-1;bgX.globalAlpha=s.a*0.35;bgX.fillStyle='#F5C518';bgX.beginPath();bgX.arc(s.x,s.y,s.r,0,Math.PI*2);bgX.fill();});bgX.globalAlpha=1;requestAnimationFrame(drawBg);}
+initBg();drawBg();window.addEventListener('resize',initBg);
+
+// ── REIGNS DATA ──
+const REIGNS = [
+  {
+    answer:"The Undertaker",
+    belt:"🏆 WWF Championship",
+    days:434,
+    era:"Attitude Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Houston, Texas"},
+      {icon:"💀", label:"Finishing Move", text:"Tombstone Piledriver & Chokeslam"},
+      {icon:"📺", label:"Signature Moment", text:"Defeated Hulk Hogan for the title at Survivor Series 1991"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'T'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Had legendary feuds with Mankind and Kane"},
+    ]
+  },
+  {
+    answer:"Roman Reigns",
+    belt:"🏆 Universal Championship",
+    days:1316,
+    era:"Modern Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — Samoan heritage"},
+      {icon:"💀", label:"Finishing Move", text:"Spear"},
+      {icon:"📺", label:"Signature Moment", text:"Tribal Chief era began at SummerSlam 2020"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'R'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Feuded with Sami Zayn, Cody Rhodes, and Solo Sikoa"},
+    ]
+  },
+  {
+    answer:"CM Punk",
+    belt:"🏆 WWE Championship",
+    days:434,
+    era:"PG Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Chicago, Illinois"},
+      {icon:"💀", label:"Finishing Move", text:"GTS (Go To Sleep)"},
+      {icon:"📺", label:"Signature Moment", text:"Pipe Bomb promo on Raw changed everything in 2011"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'C'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Feuded with John Cena, Ryback, and The Rock"},
+    ]
+  },
+  {
+    answer:"John Cena",
+    belt:"🏆 WWE Championship",
+    days:380,
+    era:"PG Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from West Newbury, Massachusetts"},
+      {icon:"💀", label:"Finishing Move", text:"Attitude Adjustment (AA)"},
+      {icon:"📺", label:"Signature Moment", text:"16-time world champion, tied with Ric Flair's record"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'J'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Legendary feuds with CM Punk, Randy Orton, and Edge"},
+    ]
+  },
+  {
+    answer:"Steve Austin",
+    belt:"🏆 WWF Championship",
+    days:259,
+    era:"Attitude Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Victoria, Texas"},
+      {icon:"💀", label:"Finishing Move", text:"Stone Cold Stunner"},
+      {icon:"📺", label:"Signature Moment", text:"Austin 3:16 speech after King of the Ring 1996"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'S'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Iconic rivalry with Mr. McMahon and The Rock"},
+    ]
+  },
+  {
+    answer:"Hulk Hogan",
+    belt:"🏆 WWF Championship",
+    days:1474,
+    era:"Golden Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Augusta, Georgia"},
+      {icon:"💀", label:"Finishing Move", text:"Leg Drop"},
+      {icon:"📺", label:"Signature Moment", text:"Slammed Andre the Giant at WrestleMania III"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'H'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Feuded with Andre the Giant, Ultimate Warrior, and Yokozuna"},
+    ]
+  },
+  {
+    answer:"Goldberg",
+    belt:"🏆 WCW Championship",
+    days:173,
+    era:"Monday Night Wars",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Tulsa, Oklahoma"},
+      {icon:"💀", label:"Finishing Move", text:"Jackhammer & Spear"},
+      {icon:"📺", label:"Signature Moment", text:"Undefeated streak of 173-0 in WCW"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'G'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Feuded with Kevin Nash and Hollywood Hogan"},
+    ]
+  },
+  {
+    answer:"Triple H",
+    belt:"🏆 WWE Championship",
+    days:476,
+    era:"Attitude Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Nashua, New Hampshire"},
+      {icon:"💀", label:"Finishing Move", text:"Pedigree"},
+      {icon:"📺", label:"Signature Moment", text:"Leader of Evolution and D-Generation X"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'T'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Iconic feuds with Shawn Michaels, Mick Foley, and Steve Austin"},
+    ]
+  },
+  {
+    answer:"Shawn Michaels",
+    belt:"🏆 WWF Championship",
+    days:231,
+    era:"New Generation Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from San Antonio, Texas"},
+      {icon:"💀", label:"Finishing Move", text:"Sweet Chin Music (Superkick)"},
+      {icon:"📺", label:"Signature Moment", text:"Mr. WrestleMania — known for 5-star matches every year"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'S'"},
+      {icon:"⚔️", label:"Famous Rival", text:"DX partner and rival Triple H, also feuded with Bret Hart"},
+    ]
+  },
+  {
+    answer:"Randy Orton",
+    belt:"🏆 WWE Championship",
+    days:168,
+    era:"PG Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Knoxville, Tennessee"},
+      {icon:"💀", label:"Finishing Move", text:"RKO"},
+      {icon:"📺", label:"Signature Moment", text:"Youngest World Champion ever at 24 years old"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'R'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Long feuds with John Cena, Triple H, and The Viper character"},
+    ]
+  },
+  {
+    answer:"Brock Lesnar",
+    belt:"🏆 Universal Championship",
+    days:504,
+    era:"Modern Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Webster, South Dakota"},
+      {icon:"💀", label:"Finishing Move", text:"F5"},
+      {icon:"📺", label:"Signature Moment", text:"Ended The Undertaker's undefeated WrestleMania streak in 2014"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'B'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Feuded with Roman Reigns, Seth Rollins, and Bobby Lashley"},
+    ]
+  },
+  {
+    answer:"Ric Flair",
+    belt:"🏆 NWA Championship",
+    days:729,
+    era:"80s Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Minneapolis, Minnesota"},
+      {icon:"💀", label:"Finishing Move", text:"Figure Four Leglock"},
+      {icon:"📺", label:"Signature Moment", text:"16-time world champion — WOOOOO!"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'R'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Classic rivalries with Dusty Rhodes, Ricky Steamboat, and Sting"},
+    ]
+  },
+  {
+    answer:"The Rock",
+    belt:"🏆 WWF Championship",
+    days:182,
+    era:"Attitude Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — Samoan heritage, born in Hayward California"},
+      {icon:"💀", label:"Finishing Move", text:"People's Elbow & Rock Bottom"},
+      {icon:"📺", label:"Signature Moment", text:"Can you SMELL what The Rock is cooking?"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'T'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Legendary trilogy with Steve Austin at WrestleMania"},
+    ]
+  },
+  {
+    answer:"Sasha Banks",
+    belt:"🏆 RAW Women's Championship",
+    days:223,
+    era:"Women's Revolution",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Boston, Massachusetts"},
+      {icon:"💀", label:"Finishing Move", text:"Bank Statement (submission)"},
+      {icon:"📺", label:"Signature Moment", text:"5-time women's champion, known as The Boss"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'S'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Legendary rivalry with Bayley and Charlotte Flair"},
+    ]
+  },
+  {
+    answer:"Charlotte Flair",
+    belt:"🏆 SmackDown Women's Championship",
+    days:152,
+    era:"Women's Revolution",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Charlotte, North Carolina"},
+      {icon:"💀", label:"Finishing Move", text:"Figure Eight Leglock"},
+      {icon:"📺", label:"Signature Moment", text:"Daughter of Ric Flair, 14-time women's world champion"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'C'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Iconic feuds with Sasha Banks, Becky Lynch, and Ronda Rousey"},
+    ]
+  },
+  {
+    answer:"Seth Rollins",
+    belt:"🏆 Universal Championship",
+    days:57,
+    era:"Modern Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Buffalo, Iowa"},
+      {icon:"💀", label:"Finishing Move", text:"Stomp (Curb Stomp)"},
+      {icon:"📺", label:"Signature Moment", text:"The Visionary — cashed in Money in the Bank on Brock Lesnar in 2019"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'S'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Feuded with Dean Ambrose, The Authority, and Brock Lesnar"},
+    ]
+  },
+  {
+    answer:"Becky Lynch",
+    belt:"🏆 RAW Women's Championship",
+    days:399,
+    era:"Women's Revolution",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"Irish — from Limerick, Ireland"},
+      {icon:"💀", label:"Finishing Move", text:"Dis-arm-Her (armbar)"},
+      {icon:"📺", label:"Signature Moment", text:"The Man — held both Raw and SmackDown Women's titles simultaneously"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'B'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Iconic feuds with Charlotte Flair, Sasha Banks, and Ronda Rousey"},
+    ]
+  },
+  {
+    answer:"Mick Foley",
+    belt:"🏆 WWF Championship",
+    days:1,
+    era:"Attitude Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Bloomington, Indiana"},
+      {icon:"💀", label:"Finishing Move", text:"Mandible Claw & Double-Arm DDT"},
+      {icon:"📺", label:"Signature Moment", text:"Three personas: Mankind, Cactus Jack, and Dude Love"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'M'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Hell in a Cell match with The Undertaker at King of the Ring 1998"},
+    ]
+  },
+  {
+    answer:"Kurt Angle",
+    belt:"🏆 WWF Championship",
+    days:133,
+    era:"Attitude Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"American — from Pittsburgh, Pennsylvania"},
+      {icon:"💀", label:"Finishing Move", text:"Angle Slam & Ankle Lock"},
+      {icon:"📺", label:"Signature Moment", text:"Won an Olympic gold medal in 1996 with a broken freakin' neck"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'K'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Classic feuds with Steve Austin, Chris Benoit, and Brock Lesnar"},
+    ]
+  },
+  {
+    answer:"Edge",
+    belt:"🏆 World Heavyweight Championship",
+    days:168,
+    era:"PG Era",
+    clues:[
+      {icon:"🌍", label:"Nationality", text:"Canadian — from Orangeville, Ontario"},
+      {icon:"💀", label:"Finishing Move", text:"Spear"},
+      {icon:"📺", label:"Signature Moment", text:"11-time world champion, known as The Rated-R Superstar"},
+      {icon:"🔤", label:"First Letter", text:"Name starts with 'E'"},
+      {icon:"⚔️", label:"Famous Rival", text:"Legendary feuds with John Cena, The Undertaker, and Rey Mysterio"},
+    ]
+  },
+];
+
+// All names for autocomplete
+const ALL_NAMES = [...new Set(REIGNS.map(r => r.answer))].concat([
+  'The Undertaker','Roman Reigns','CM Punk','John Cena','Steve Austin','Hulk Hogan',
+  'Goldberg','Triple H','Shawn Michaels','Randy Orton','Brock Lesnar','Ric Flair',
+  'The Rock','Sasha Banks','Charlotte Flair','Seth Rollins','Becky Lynch','Mick Foley',
+  'Kurt Angle','Edge','Kevin Nash','Mankind','Cactus Jack','Dude Love','Rey Mysterio',
+  'Dean Ambrose','Jon Moxley','Chris Jericho','AJ Styles','Daniel Bryan','Batista',
+  'Bobby Lashley','Big E','Sami Zayn','Kevin Owens','Finn Balor','Bayley','Asuka',
+  'Bianca Belair','Rhea Ripley','Trish Stratus','Lita','Ronda Rousey','Andre the Giant',
+  'Bret Hart','Owen Hart','Diesel','Razor Ramon','Goldust','Jake Roberts','Sting',
+  'Lex Luger','Diamond Dallas Page','Booker T','Goldberg','Bill Goldberg','Cody Rhodes',
+  'The Miz','Alberto Del Rio','Sheamus','Cesaro','Sami Zayn','Solo Sikoa','Jey Uso',
+  'Jimmy Uso','Big Show','Mark Henry','Kane','Mankind'
+]);
+const UNIQUE_NAMES = [...new Set(ALL_NAMES)].sort();
+
+// ── EST DATE ──
+function getESTDateKey(){
+  const now=new Date();
+  const jan=new Date(now.getFullYear(),0,1).getTimezoneOffset();
+  const jul=new Date(now.getFullYear(),6,1).getTimezoneOffset();
+  const isDST=now.getTimezoneOffset()<Math.max(jan,jul);
+  const offsetMin=-5*60+(isDST?60:0);
+  const estTime=new Date(now.getTime()+(now.getTimezoneOffset()+offsetMin)*60000);
+  return estTime.toISOString().slice(0,10);
+}
+function getDayIndex(){
+  const start=new Date('2024-01-01');
+  const now=new Date(getESTDateKey());
+  return Math.floor((now-start)/(1000*60*60*24))%REIGNS.length;
+}
+
+const todayData=REIGNS[getDayIndex()];
+const dateKey=getESTDateKey();
+const storageKey=`reignle_${dateKey}`;
+
+// Clue thresholds: show clue N after this many wrong guesses
+const CLUE_THRESHOLDS=[0,1,2,3,4];
+
+// ── STATE ──
+let guesses=[],gameOver=false,won=false;
+const saved=localStorage.getItem(storageKey);
+if(saved){const s=JSON.parse(saved);guesses=s.guesses||[];gameOver=s.gameOver||false;won=s.won||false;}
+
+// ── STREAK ──
+function getStreak(){return parseInt(localStorage.getItem('reignle_streak')||'0');}
+function updateStreak(w){
+  const yesterday=new Date(getESTDateKey());yesterday.setDate(yesterday.getDate()-1);
+  const yk=yesterday.toISOString().slice(0,10);
+  const lastWin=localStorage.getItem('reignle_lastwin');
+  let streak=getStreak();
+  if(w){if(lastWin===yk)streak++;else if(lastWin===dateKey){}else streak=1;localStorage.setItem('reignle_lastwin',dateKey);localStorage.setItem('reignle_streak',streak);}
+  else{localStorage.setItem('reignle_streak','0');}
+  return streak;
+}
+document.getElementById('streak-display').textContent=getStreak();
+
+// ── RENDER BELT CARD ──
+document.getElementById('belt-emoji').textContent=todayData.belt.split(' ')[0];
+document.getElementById('belt-title').textContent=todayData.belt.replace(/^.\s/,'');
+document.getElementById('belt-days').textContent=todayData.days.toLocaleString();
+document.getElementById('belt-era').textContent=todayData.era;
+
+// ── RENDER CLUES ──
+function renderClues(){
+  const wrongCount=guesses.filter(g=>!g.correct).length;
+  const el=document.getElementById('clues-wrap');
+  const visible=todayData.clues.filter((_,i)=>wrongCount>=CLUE_THRESHOLDS[i]);
+  el.innerHTML=visible.map(c=>`
+    <div class="clue-row">
+      <span class="clue-icon">${c.icon}</span>
+      <div>
+        <div class="clue-label">${c.label}</div>
+        <div class="clue-text">${c.text}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── RENDER GUESSES ──
+function renderGuesses(){
+  document.getElementById('guess-history').innerHTML=guesses.map(g=>`
+    <div class="g-row ${g.correct?'correct':'wrong'}">${g.correct?'✅':'❌'} ${g.name}</div>
+  `).join('');
+  document.getElementById('guess-count-num').textContent=guesses.length;
+}
+
+function saveState(){localStorage.setItem(storageKey,JSON.stringify({guesses,gameOver,won}));}
+
+function showResult(){
+  document.getElementById('r-icon').textContent=won?'🏆':'😤';
+  document.getElementById('r-label').textContent=won?'CORRECT!':'GAVE UP';
+  document.getElementById('r-label').className=`r-label ${won?'win':'lose'}`;
+  document.getElementById('r-name').textContent=todayData.answer;
+  document.getElementById('r-belt').textContent=`${todayData.belt} · ${todayData.days} days`;
+  if(won){
+    document.getElementById('r-guesses').textContent=guesses.length;
+    document.getElementById('r-guesses-label').textContent=guesses.length===1?'GUESS':'GUESSES';
+  } else {
+    document.getElementById('r-guesses').textContent='—';
+    document.getElementById('r-guesses-label').textContent='BETTER LUCK TOMORROW';
+  }
+  const streak=updateStreak(won);
+  document.getElementById('r-streak').textContent=won?`🔥 ${streak} day streak!`:'Come back tomorrow';
+  document.getElementById('result-overlay').classList.add('show');
+}
+
+function render(){
+  renderClues();renderGuesses();
+  if(gameOver)setTimeout(showResult,500);
+}
+
+// ── AUTOCOMPLETE ──
+const input=document.getElementById('guess-input'),ac=document.getElementById('autocomplete');
+let acSel=-1;
+input.addEventListener('input',()=>{
+  const val=input.value.trim().toLowerCase();
+  if(!val){ac.classList.remove('show');return;}
+  const matches=UNIQUE_NAMES.filter(n=>n.toLowerCase().includes(val)).slice(0,7);
+  if(!matches.length){ac.classList.remove('show');return;}
+  ac.innerHTML=matches.map(n=>`<div class="auto-item" data-name="${n}">${n}</div>`).join('');
+  ac.classList.add('show');acSel=-1;
+  ac.querySelectorAll('.auto-item').forEach(item=>{
+    item.addEventListener('click',()=>{input.value=item.dataset.name;ac.classList.remove('show');submitGuess();});
+  });
+});
+input.addEventListener('keydown',e=>{
+  const items=ac.querySelectorAll('.auto-item');
+  if(e.key==='ArrowDown'){e.preventDefault();acSel=Math.min(acSel+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();acSel=Math.max(acSel-1,-1);}
+  else if(e.key==='Enter'){e.preventDefault();if(acSel>=0&&items[acSel]){input.value=items[acSel].dataset.name;ac.classList.remove('show');submitGuess();return;}submitGuess();return;}
+  items.forEach((it,i)=>it.classList.toggle('selected',i===acSel));
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.input-wrap'))ac.classList.remove('show');});
+
+// ── SUBMIT ──
+function submitGuess(){
+  if(gameOver)return;
+  const val=input.value.trim();
+  if(!val)return;
+  input.value='';ac.classList.remove('show');
+  const correct=val.toLowerCase()===todayData.answer.toLowerCase();
+  guesses.push({name:val,correct});
+  if(correct){won=true;gameOver=true;}
+  saveState();render();
+}
+
+document.getElementById('submit-btn').addEventListener('click',submitGuess);
+document.getElementById('giveup-btn').addEventListener('click',()=>{
+  if(gameOver)return;
+  gameOver=true;won=false;saveState();render();
+});
+
+document.getElementById('share-btn').addEventListener('click',()=>{
+  const squares=guesses.map(g=>g.correct?'🟩':'🟥').join('');
+  const n=guesses.length;
+  const text=won
+    ?`🏆 REIGNLE\n${todayData.belt}\n${todayData.days} days\n${squares}\nGot it in ${n} ${n===1?'guess':'guesses'}!\n▶ https://boltarcade.github.io/BoltArcade`
+    :`🏆 REIGNLE\n${todayData.belt}\n${todayData.days} days\n${squares}\nGave up on ${todayData.answer} 😤\n▶ https://boltarcade.github.io/BoltArcade`;
+  if(navigator.share)navigator.share({text});
+  else navigator.clipboard.writeText(text).then(()=>alert('Copied!'));
+});
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>

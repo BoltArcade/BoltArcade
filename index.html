@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="BOLT ARCADE — Free browser games. Daily challenges, sports trivia, and more. No download needed.">
+<title>BOLT ARCADE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700;1,900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#F5C518;
+  --orange:#FF4D00;
+  --red:#E8003D;
+  --white:#FAFAFA;
+  --dark:#0A0A0A;
+  --dark2:#111111;
+  --dark3:#1A1A1A;
+  --border:rgba(255,255,255,0.07);
+  --muted:rgba(255,255,255,0.38);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;}
+body{min-height:100vh;background:var(--dark);font-family:'Barlow',sans-serif;color:var(--white);overflow-x:hidden;}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px 180px;}
+
+#page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 14px 80px;}
+
+/* ── MASTHEAD ── */
+#masthead{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  border-bottom:3px solid var(--gold);
+  padding:16px 0 10px;gap:10px;
+}
+#site-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(42px,11vw,80px);font-weight:900;
+  letter-spacing:-0.01em;line-height:0.85;text-transform:uppercase;
+  color:var(--white);
+}
+#site-name em{font-style:normal;color:var(--gold);}
+#site-tagline{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(9px,2vw,12px);font-weight:700;
+  letter-spacing:0.32em;text-transform:uppercase;color:var(--muted);margin-top:5px;
+}
+#masthead-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-bottom:2px;}
+#free-badge{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;
+  background:var(--gold);color:var(--dark);padding:3px 9px;border-radius:1px;
+}
+#no-dl{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);
+}
+
+/* ── TICKER ── */
+#ticker{background:var(--gold);overflow:hidden;padding:5px 0;margin-bottom:22px;}
+#ticker-track{display:flex;white-space:nowrap;animation:scroll 28s linear infinite;}
+.tick{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--dark);padding:0 24px;flex-shrink:0;}
+.tick-sep{color:rgba(0,0,0,0.3);padding:0 2px;}
+@keyframes scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* ── SECTION HEADER ── */
+.sec-head{display:flex;align-items:center;gap:0;margin:24px 0 12px;}
+.sec-tag{
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;
+  letter-spacing:0.3em;text-transform:uppercase;
+  background:var(--gold);color:var(--dark);
+  padding:3px 14px 3px 10px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%);
+}
+.sec-line{flex:1;height:1px;background:var(--border);}
+.sec-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;
+  letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);padding-left:10px;white-space:nowrap;
+}
+
+/* ── DAILY GRID ── */
+#daily-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));
+  gap:8px;margin-bottom:4px;
+}
+.d-card{
+  background:var(--dark2);
+  border:1px solid var(--border);
+  border-top:3px solid var(--gold);
+  border-radius:0 0 4px 4px;
+  text-decoration:none;color:var(--white);
+  display:flex;flex-direction:column;
+  transition:transform 0.14s,box-shadow 0.14s,border-top-color 0.14s;
+  animation:fadeUp 0.4s ease both;
+}
+.d-card:hover{transform:translateY(-4px);border-top-color:var(--orange);box-shadow:0 10px 36px rgba(0,0,0,0.55);}
+.d-card:active{transform:scale(0.975);}
+.d-card:nth-child(1){animation-delay:0.04s;}
+.d-card:nth-child(2){animation-delay:0.08s;}
+.d-card:nth-child(3){animation-delay:0.12s;}
+.d-card:nth-child(4){animation-delay:0.16s;}
+.d-card:nth-child(5){animation-delay:0.2s;}
+
+.d-preview{width:100%;aspect-ratio:16/7;overflow:hidden;background:#0c0c0c;position:relative;}
+.d-preview canvas{display:block;width:100%;height:100%;}
+.d-live{
+  position:absolute;top:7px;left:7px;
+  background:var(--red);color:#fff;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;
+  padding:2px 7px;border-radius:1px;
+  display:flex;align-items:center;gap:4px;
+}
+.d-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 1.3s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+
+.d-body{padding:9px 11px 12px;flex:1;display:flex;flex-direction:column;}
+.d-sport{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+.d-name{font-family:'Barlow Condensed',sans-serif;font-size:clamp(17px,4vw,21px);font-weight:900;text-transform:uppercase;letter-spacing:0.02em;line-height:0.95;margin-bottom:4px;}
+.d-desc{font-size:11px;color:var(--muted);line-height:1.4;flex:1;margin-bottom:9px;}
+.d-btn{
+  display:block;background:var(--gold);color:var(--dark);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
+  padding:7px 0;text-align:center;border-radius:1px;text-decoration:none;
+  transition:background 0.1s,color 0.1s;
+}
+.d-btn:hover{background:var(--orange);color:#fff;}
+
+/* ── ARCADE GRID ── */
+#arcade-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));
+  gap:10px;
+}
+.g-card{
+  background:var(--dark2);border:1px solid var(--border);border-radius:3px;
+  overflow:hidden;text-decoration:none;color:var(--white);
+  display:flex;flex-direction:column;
+  transition:transform 0.14s,box-shadow 0.14s,border-color 0.14s;
+  animation:fadeUp 0.4s ease both;
+}
+.g-card:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,0.6),0 0 0 1px rgba(245,197,24,0.18);border-color:rgba(245,197,24,0.18);}
+.g-card:active{transform:scale(0.975);}
+.g-card:nth-child(1){animation-delay:0.05s;}
+.g-card:nth-child(2){animation-delay:0.09s;}
+.g-card:nth-child(3){animation-delay:0.13s;}
+.g-card:nth-child(4){animation-delay:0.17s;}
+.g-card:nth-child(5){animation-delay:0.21s;}
+.g-card:nth-child(6){animation-delay:0.25s;}
+.g-card:nth-child(7){animation-delay:0.29s;}
+.g-card:nth-child(8){animation-delay:0.33s;}
+.g-card:nth-child(9){animation-delay:0.37s;}
+.g-card:nth-child(10){animation-delay:0.41s;}
+
+.g-preview{position:relative;width:100%;aspect-ratio:16/7;overflow:hidden;background:#0c0c0c;}
+.g-preview canvas{display:block;width:100%;height:100%;}
+.g-badge{
+  position:absolute;top:7px;right:7px;
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;
+  padding:2px 7px;border-radius:1px;
+}
+.badge-play{background:var(--gold);color:var(--dark);}
+.badge-soon{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);}
+
+.g-body{padding:11px 13px 13px;flex:1;display:flex;flex-direction:column;}
+.g-kicker{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+.g-name{font-family:'Barlow Condensed',sans-serif;font-size:clamp(19px,5vw,24px);font-weight:900;text-transform:uppercase;letter-spacing:0.02em;line-height:0.92;margin-bottom:5px;color:var(--white);}
+.g-desc{font-size:11px;color:var(--muted);line-height:1.45;flex:1;margin-bottom:9px;}
+.g-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px;}
+.tag{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:2px 6px;border-radius:1px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.3);}
+.g-play{
+  display:block;width:100%;padding:9px 0;
+  background:var(--dark3);border:1px solid rgba(255,255,255,0.08);border-radius:1px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--white);text-align:center;text-decoration:none;
+  transition:background 0.1s,color 0.1s,border-color 0.1s;
+}
+.g-play:hover{background:var(--gold);color:var(--dark);border-color:var(--gold);}
+.g-card-soon .g-name{color:rgba(255,255,255,0.18);}
+.g-card-soon .g-play{background:transparent;color:rgba(255,255,255,0.18);cursor:default;pointer-events:none;}
+.g-card-soon .g-preview::after{content:'';position:absolute;inset:0;background:rgba(10,10,10,0.55);}
+
+/* ── COMING MINI ── */
+#mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,130px),1fr));gap:6px;}
+.mini-card{background:var(--dark2);border:1px solid var(--border);border-radius:3px;aspect-ratio:5/3;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;}
+.mini-card canvas{position:absolute;inset:0;width:100%;height:100%;}
+.mini-label{position:relative;z-index:1;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.22);background:rgba(10,10,10,0.75);padding:2px 8px;border-radius:1px;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);margin-top:44px;padding-top:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.ft-logo{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);}
+.ft-logo em{font-style:normal;color:var(--gold);}
+.ft-copy{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.15);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div id="page">
+
+  <!-- MASTHEAD -->
+  <div id="masthead">
+    <div>
+      <div id="site-name">BOLT<em>ARCADE</em></div>
+      <div id="site-tagline">Free Browser Games · No Download Needed</div>
+    </div>
+    <div id="masthead-meta">
+      <div id="free-badge">Free to Play</div>
+      <div id="no-dl">No Account · No App</div>
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div id="ticker">
+    <div id="ticker-track">
+      <span class="tick">🏀 Buckets</span><span class="tick-sep">·</span>
+      <span class="tick">🏳️ Daily Flag</span><span class="tick-sep">·</span>
+      <span class="tick">🔢 Numble</span><span class="tick-sep">·</span>
+      <span class="tick">🏀 Basketball Squads</span><span class="tick-sep">·</span>
+      <span class="tick">🏈 Football Squads</span><span class="tick-sep">·</span>
+      <span class="tick">⚡ Bolt Runner</span><span class="tick-sep">·</span>
+      <span class="tick">🎯 Shooter</span><span class="tick-sep">·</span>
+      <span class="tick">🌍 Distance</span><span class="tick-sep">·</span>
+      <span class="tick">💰 Price Check</span><span class="tick-sep">·</span>
+      <span class="tick">🔥 Calorie Count</span><span class="tick-sep">·</span>
+      <span class="tick">📅 Year Guesser</span><span class="tick-sep">·</span>
+      <span class="tick">🤔 Would You Rather</span><span class="tick-sep">·</span>
+      <span class="tick">🏆 Reignle</span><span class="tick-sep">·</span>
+      <!-- duplicate -->
+      <span class="tick">🏀 Buckets</span><span class="tick-sep">·</span>
+      <span class="tick">🏳️ Daily Flag</span><span class="tick-sep">·</span>
+      <span class="tick">🔢 Numble</span><span class="tick-sep">·</span>
+      <span class="tick">🏀 Basketball Squads</span><span class="tick-sep">·</span>
+      <span class="tick">🏈 Football Squads</span><span class="tick-sep">·</span>
+      <span class="tick">⚡ Bolt Runner</span><span class="tick-sep">·</span>
+      <span class="tick">🎯 Shooter</span><span class="tick-sep">·</span>
+      <span class="tick">🌍 Distance</span><span class="tick-sep">·</span>
+      <span class="tick">💰 Price Check</span><span class="tick-sep">·</span>
+      <span class="tick">🔥 Calorie Count</span><span class="tick-sep">·</span>
+      <span class="tick">📅 Year Guesser</span><span class="tick-sep">·</span>
+      <span class="tick">🤔 Would You Rather</span><span class="tick-sep">·</span>
+      <span class="tick">🏆 Reignle</span><span class="tick-sep">·</span>
+    </div>
+  </div>
+
+  <!-- DAILY -->
+  <div class="sec-head">
+    <div class="sec-tag">Today's Games</div>
+    <div class="sec-line"></div>
+    <div class="sec-sub">Resets midnight EST</div>
+  </div>
+
+  <div id="daily-grid">
+    <a class="d-card" href="dailyflag.html">
+      <div class="d-preview"><canvas id="flag-preview" width="560" height="196"></canvas><div class="d-live">LIVE</div></div>
+      <div class="d-body">
+        <div class="d-sport">Geography</div>
+        <div class="d-name">Daily Flag</div>
+        <div class="d-desc">Guess the country from its flag. Unlimited tries, hints unlock along the way.</div>
+        <div class="d-btn">🏳️ Play Today's</div>
+      </div>
+    </a>
+    <a class="d-card" href="buckets.html">
+      <div class="d-preview"><canvas id="buckets-preview" width="560" height="196"></canvas><div class="d-live">LIVE</div></div>
+      <div class="d-body">
+        <div class="d-sport">Basketball · Wordle</div>
+        <div class="d-name">Buckets</div>
+        <div class="d-desc">Guess the basketball player's last name letter by letter. 6 guesses, clues unlock.</div>
+        <div class="d-btn">🏀 Play Today's</div>
+      </div>
+    </a>
+    <a class="d-card" href="numble.html">
+      <div class="d-preview"><canvas id="numble-preview" width="560" height="196"></canvas><div class="d-live">LIVE</div></div>
+      <div class="d-body">
+        <div class="d-sport">Numbers · Wordle</div>
+        <div class="d-name">Numble</div>
+        <div class="d-desc">Guess the basketball number digit by digit. Too high, too low, or exact?</div>
+        <div class="d-btn">🔢 Play Today's</div>
+      </div>
+    </a>
+    <a class="d-card" href="squads.html">
+      <div class="d-preview"><canvas id="squads-preview" width="560" height="196"></canvas><div class="d-live">LIVE</div></div>
+      <div class="d-body">
+        <div class="d-sport">Basketball · Connections</div>
+        <div class="d-name">Squads</div>
+        <div class="d-desc">16 basketball players, 4 hidden groups. Find what they have in common.</div>
+        <div class="d-btn">🏀 Play Today's</div>
+      </div>
+    </a>
+    <a class="d-card" href="nflsquads.html">
+      <div class="d-preview"><canvas id="nflsquads-preview" width="560" height="196"></canvas><div class="d-live">LIVE</div></div>
+      <div class="d-body">
+        <div class="d-sport">Football · Connections</div>
+        <div class="d-name">Football Squads</div>
+        <div class="d-desc">16 football players, 4 hidden groups. Same team, era, position, or more.</div>
+        <div class="d-btn">🏈 Play Today's</div>
+      </div>
+    </a>
+    <a class="d-card" href="reignle.html">
+      <div class="d-preview"><canvas id="reignle-preview" width="560" height="196"></canvas><div class="d-live">LIVE</div></div>
+      <div class="d-body">
+        <div class="d-sport">Wrestling · Daily</div>
+        <div class="d-name">Reignle</div>
+        <div class="d-desc">A championship reign is shown — days held, title, era. Guess the wrestler. Clues unlock each wrong guess.</div>
+        <div class="d-btn">🏆 Play Today's</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ARCADE -->
+  <div class="sec-head">
+    <div class="sec-tag">Arcade Games</div>
+    <div class="sec-line"></div>
+    <div class="sec-sub">Play anytime</div>
+  </div>
+
+  <div id="arcade-grid">
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="bolt-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Endless Runner</div>
+        <div class="g-name">Bolt</div>
+        <div class="g-desc">Dodge obstacles, collect gems, survive as long as you can. Gets faster every level.</div>
+        <div class="g-tags"><span class="tag">endless</span><span class="tag">double jump</span><span class="tag">highscore</span></div>
+        <a class="g-play" href="game.html" style="background:linear-gradient(90deg,#f9c846,#f97316);color:#0a0800;border:none;">⚡ Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="dodge-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Survival</div>
+        <div class="g-name" style="color:#4cc9f0;">Dodge</div>
+        <div class="g-desc">Blocks rain from above. Move to survive. Waves get faster every 10 seconds.</div>
+        <div class="g-tags"><span class="tag">dodge</span><span class="tag">waves</span><span class="tag">survival</span></div>
+        <a class="g-play" href="dodge.html" style="background:linear-gradient(90deg,#4cc9f0,#7b5ea7);color:#fff;border:none;">💎 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="fg-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Football</div>
+        <div class="g-name">Field Goal</div>
+        <div class="g-desc">Tap when the aim is centered. Wind pushes the ball sideways. 3 lives.</div>
+        <div class="g-tags"><span class="tag">timing</span><span class="tag">football</span><span class="tag">wind</span></div>
+        <a class="g-play" href="fieldgoal.html" style="background:var(--gold);color:var(--dark);border:none;">🏈 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="shooter-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Reflex</div>
+        <div class="g-name" style="color:#ef4444;">Shooter</div>
+        <div class="g-desc">Targets slide across the screen — tap to shoot. Build combos. 30 seconds.</div>
+        <div class="g-tags"><span class="tag">tap</span><span class="tag">combo</span><span class="tag">reflex</span></div>
+        <a class="g-play" href="shooter.html" style="background:linear-gradient(90deg,#ef4444,#f97316);color:#fff;border:none;">🎯 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="price-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Trivia</div>
+        <div class="g-name">Price Check</div>
+        <div class="g-desc">Guess the price of real products. Don't go over or you lose a life. 10 items.</div>
+        <div class="g-tags"><span class="tag">trivia</span><span class="tag">slider</span><span class="tag">3 lives</span></div>
+        <a class="g-play" href="pricecheck.html" style="background:var(--gold);color:var(--dark);border:none;">💰 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="wyr-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Social</div>
+        <div class="g-name" style="color:#a855f7;">Would You Rather</div>
+        <div class="g-desc">10 rapid-fire dilemmas. Pick one — then see what % of people agree with you.</div>
+        <div class="g-tags"><span class="tag">choices</span><span class="tag">viral</span><span class="tag">shareable</span></div>
+        <a class="g-play" href="wyr.html" style="background:linear-gradient(90deg,#a855f7,#3b82f6);color:#fff;border:none;">🤔 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="cal-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Food</div>
+        <div class="g-name" style="color:#f97316;">Calorie Count</div>
+        <div class="g-desc">Guess the calories in real foods. Big Mac to a Chipotle burrito. 3 lives.</div>
+        <div class="g-tags"><span class="tag">food</span><span class="tag">slider</span><span class="tag">3 lives</span></div>
+        <a class="g-play" href="caloriecount.html" style="background:linear-gradient(90deg,#f97316,#ef4444);color:#fff;border:none;">🔥 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="year-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">History</div>
+        <div class="g-name" style="color:#f59e0b;">Year Guesser</div>
+        <div class="g-desc">A historical event is described — guess what year it happened.</div>
+        <div class="g-tags"><span class="tag">history</span><span class="tag">slider</span><span class="tag">trivia</span></div>
+        <a class="g-play" href="yearguesser.html" style="background:linear-gradient(90deg,#f59e0b,#ef4444);color:#0a0800;border:none;">📅 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="crowd-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Numbers</div>
+        <div class="g-name" style="color:#8b5cf6;">Crowd Guess</div>
+        <div class="g-desc">Guess crowd sizes at stadiums and events. Super Bowl to Coachella.</div>
+        <div class="g-tags"><span class="tag">numbers</span><span class="tag">slider</span><span class="tag">trivia</span></div>
+        <a class="g-play" href="crowdguess.html" style="background:linear-gradient(90deg,#8b5cf6,#3b82f6);color:#fff;border:none;">👥 Play</a>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-preview"><canvas id="dist-preview" width="560" height="196"></canvas><div class="g-badge badge-play">PLAY NOW</div></div>
+      <div class="g-body">
+        <div class="g-kicker">Geography</div>
+        <div class="g-name" style="color:#06b6d4;">Distance</div>
+        <div class="g-desc">Two cities are shown — guess the distance in miles. NYC to London and more.</div>
+        <div class="g-tags"><span class="tag">geography</span><span class="tag">slider</span><span class="tag">trivia</span></div>
+        <a class="g-play" href="distance.html" style="background:linear-gradient(90deg,#06b6d4,#3b82f6);color:#fff;border:none;">🌍 Play</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COMING SOON -->
+  <div class="sec-head">
+    <div class="sec-tag">Coming Soon</div>
+    <div class="sec-line"></div>
+  </div>
+  <div id="mini-grid">
+    <div class="mini-card"><canvas class="soon-canvas" width="300" height="180" data-hue="200"></canvas><div class="mini-label">Coming Soon</div></div>
+    <div class="mini-card"><canvas class="soon-canvas" width="300" height="180" data-hue="120"></canvas><div class="mini-label">Coming Soon</div></div>
+    <div class="mini-card"><canvas class="soon-canvas" width="300" height="180" data-hue="280"></canvas><div class="mini-label">Coming Soon</div></div>
+    <div class="mini-card"><canvas class="soon-canvas" width="300" height="180" data-hue="30"></canvas><div class="mini-label">Coming Soon</div></div>
+    <div class="mini-card"><canvas class="soon-canvas" width="300" height="180" data-hue="180"></canvas><div class="mini-label">Coming Soon</div></div>
+    <div class="mini-card"><canvas class="soon-canvas" width="300" height="180" data-hue="340"></canvas><div class="mini-label">Coming Soon</div></div>
+  </div>
+
+  <footer>
+    <div class="ft-logo">BOLT<em>ARCADE</em></div>
+    <div class="ft-copy">boltarcade.github.io · Free · More games dropping soon</div>
+  </footer>
+</div>
+
+<script>
+/* BOLT PREVIEW */
+(function(){var pc=document.getElementById('bolt-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,GY=Math.round(H*0.76),px=W*0.13,py=GY,pvy=0,pj=0,pW=14,pH=20,pSq=1,pSqV=0,trail=[],obs=[],gems=[],obsCD=55,gemCD=90,fr=0,spd=4.2;function aiTick(){for(var i=0;i<obs.length;i++){var o=obs[i];if(o.x-px<W*0.28&&o.x-px>0&&py>=GY-2&&pj===0){pvy=-(H*0.068);pj++;pSq=0.55;pSqV=0.09;}}pvy+=H*0.0034;py+=pvy;if(py>=GY){py=GY;pvy=0;pj=0;}pSq+=(1-pSq)*0.22+pSqV;pSqV*=0.76;if(Math.abs(pSq-1)<0.002){pSq=1;pSqV=0;}trail.push({x:px,y:py,sq:pSq});if(trail.length>10)trail.shift();for(var i=0;i<obs.length;i++)obs[i].x-=spd;var ko=[];for(var i=0;i<obs.length;i++)if(obs[i].x>-20)ko.push(obs[i]);obs=ko;obsCD--;if(obsCD<=0){obs.push({x:W+10,y:GY-20-Math.random()*18,w:12,h:20+Math.random()*16,col:Math.random()<0.5?'#f94060':'#d946ef'});obsCD=52+Math.floor(Math.random()*36);}for(var i=0;i<gems.length;i++){gems[i].x-=spd*0.82;gems[i].a+=0.09;}var kg=[];for(var i=0;i<gems.length;i++)if(gems[i].x>-12)kg.push(gems[i]);gems=kg;gemCD--;if(gemCD<=0){gems.push({x:W+10,y:GY-38-Math.random()*44,a:0});gemCD=90+Math.floor(Math.random()*55);}}function dp(){fr++;aiTick();ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,240,200,0.2)';for(var si=0;si<25;si++){ctx.beginPath();ctx.arc((si*79+fr*0.18)%W,(si*53)%GY,0.7,0,Math.PI*2);ctx.fill();}ctx.fillStyle='#111';ctx.fillRect(0,GY+1,W,H-GY-1);ctx.strokeStyle='rgba(245,197,24,0.35)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,GY+1);ctx.lineTo(W,GY+1);ctx.stroke();var cr=4;for(var i=0;i<gems.length;i++){var g=gems[i],sc=1+0.1*Math.sin(g.a);ctx.save();ctx.translate(g.x,g.y);ctx.scale(sc,sc);ctx.beginPath();ctx.moveTo(0,-cr*1.4);ctx.lineTo(cr,-cr*0.2);ctx.lineTo(0,cr*1.4);ctx.lineTo(-cr,-cr*0.2);ctx.closePath();ctx.fillStyle='#4cc9f0';ctx.shadowColor='#4cc9f0';ctx.shadowBlur=8;ctx.fill();ctx.restore();}for(var i=0;i<obs.length;i++){var o=obs[i];ctx.save();ctx.fillStyle=o.col;ctx.shadowColor=o.col;ctx.shadowBlur=8;ctx.fillRect(o.x,o.y,o.w,o.h);ctx.restore();}for(var i=0;i<trail.length;i++){var t=trail[i],a=(i/trail.length)*0.28,tsw=pW*(2-t.sq)*0.65,tsh=pH*t.sq*0.65;ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#f97316';ctx.fillRect(t.x-tsw/2,t.y-tsh+2,tsw,tsh);ctx.restore();}var sw=pW*(2-pSq),sh=pH*pSq,dx=px-sw/2,dy=py-sh+2;ctx.save();var bg=ctx.createLinearGradient(dx,dy,dx+sw,dy+sh);bg.addColorStop(0,'#F5C518');bg.addColorStop(1,'#FF4D00');ctx.fillStyle=bg;ctx.shadowColor='#F5C518';ctx.shadowBlur=12;ctx.fillRect(dx,dy,sw,sh);ctx.restore();requestAnimationFrame(dp);}dp();}());
+
+/* DODGE PREVIEW */
+(function(){var pc=document.getElementById('dodge-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,enemies=[],fr=0,spawnCD=30,angle=0,px=W/2,py=H*0.72,cols=['#f94060','#f97316','#ff2d6b','#fb923c'];function loop(){fr++;angle+=0.04;var tpx=W*0.18+Math.sin(angle)*W*0.55;px+=(tpx-px)*0.12;for(var i=0;i<enemies.length;i++){enemies[i].y+=enemies[i].vy;enemies[i].x+=enemies[i].vx;}var k=[];for(var i=0;i<enemies.length;i++)if(enemies[i].y<H+30)k.push(enemies[i]);enemies=k;spawnCD--;if(spawnCD<=0){var ew=14+Math.random()*22,eh=12+Math.random()*18;enemies.push({x:ew/2+Math.random()*(W-ew),y:-eh,w:ew,h:eh,vy:1.8+Math.random()*1.4,vx:(Math.random()-0.5)*1.2,col:cols[Math.floor(Math.random()*cols.length)]});spawnCD=28+Math.floor(Math.random()*18);}ctx.fillStyle='#0a0a16';ctx.fillRect(0,0,W,H);for(var i=0;i<enemies.length;i++){var e=enemies[i];ctx.save();ctx.fillStyle=e.col;ctx.shadowColor=e.col;ctx.shadowBlur=8;ctx.fillRect(e.x-e.w/2,e.y-e.h/2,e.w,e.h);ctx.restore();}ctx.save();ctx.shadowColor='#4cc9f0';ctx.shadowBlur=14;ctx.fillStyle='#4cc9f0';ctx.beginPath();ctx.arc(px,py,10,0,Math.PI*2);ctx.fill();ctx.restore();requestAnimationFrame(loop);}loop();}());
+
+/* FIELD GOAL PREVIEW */
+(function(){var pc=document.getElementById('fg-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,aimX=0,aimDir=1,ballY=H*0.8,ballFly=false,ballX=W/2,ballVY=0,ballRot=0;function draw(){fr++;ctx.fillStyle='#0a1428';ctx.fillRect(0,0,W,H);ctx.fillStyle='#1a2a1a';ctx.fillRect(0,H*0.48,W,H*0.52);var ux=W/2,uy=H*0.06,uw=W*0.38,uh=H*0.28;ctx.save();ctx.strokeStyle='#F5C518';ctx.lineWidth=3;ctx.shadowColor='#F5C518';ctx.shadowBlur=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ux,uy+uh+H*0.12);ctx.lineTo(ux,uy+uh);ctx.stroke();ctx.beginPath();ctx.moveTo(ux-uw/2,uy+uh);ctx.lineTo(ux+uw/2,uy+uh);ctx.stroke();ctx.beginPath();ctx.moveTo(ux-uw/2,uy+uh);ctx.lineTo(ux-uw/2,uy);ctx.stroke();ctx.beginPath();ctx.moveTo(ux+uw/2,uy+uh);ctx.lineTo(ux+uw/2,uy);ctx.stroke();ctx.restore();if(!ballFly){aimX+=aimDir*2.5;if(aimX>W*0.38||aimX<-W*0.38)aimDir*=-1;ctx.save();ctx.strokeStyle='rgba(245,197,24,0.45)';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(W/2,H*0.8);ctx.lineTo(W/2+aimX,H*0.2);ctx.stroke();ctx.setLineDash([]);ctx.restore();if(fr%90===0){ballFly=true;ballX=W/2;ballVY=-4.5;ballRot=0;}}if(ballFly){ballY+=ballVY;ballVY+=0.18;ballX+=aimX/40;ballRot+=0.15;ctx.save();ctx.translate(ballX,ballY);ctx.rotate(ballRot);ctx.beginPath();ctx.ellipse(0,0,8,5,0,0,Math.PI*2);ctx.fillStyle='#c8652a';ctx.shadowColor='#c8652a';ctx.shadowBlur=6;ctx.fill();ctx.restore();if(ballY<0||ballY>H){ballFly=false;ballY=H*0.8;aimX=0;}}requestAnimationFrame(draw);}draw();}());
+
+/* SHOOTER PREVIEW */
+(function(){var pc=document.getElementById('shooter-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,targets=[],bullets=[],spawnCD=40;function loop(){fr++;spawnCD--;if(spawnCD<=0){var r=12+Math.random()*10,y=H*0.2+Math.random()*H*0.6;targets.push({x:W+r,y:y,r:r,vx:-(1.5+Math.random()),flash:0});spawnCD=35+Math.floor(Math.random()*25);}for(var i=0;i<targets.length;i++){targets[i].x+=targets[i].vx;if(targets[i].flash>0)targets[i].flash--;}var kt=[];for(var i=0;i<targets.length;i++)if(targets[i].x>-30)kt.push(targets[i]);targets=kt;if(fr%45===0&&targets.length>0){var t=targets[Math.floor(Math.random()*targets.length)];bullets.push({x:W*0.05,y:H/2,tx:t.x,ty:t.y,prog:0});t.flash=8;}for(var i=0;i<bullets.length;i++)bullets[i].prog+=0.12;var kb=[];for(var i=0;i<bullets.length;i++)if(bullets[i].prog<1)kb.push(bullets[i]);bullets=kb;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);for(var i=0;i<bullets.length;i++){var b=bullets[i],bx=b.x+(b.tx-b.x)*b.prog,by=b.y+(b.ty-b.y)*b.prog;ctx.save();ctx.fillStyle='#F5C518';ctx.shadowColor='#F5C518';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(bx,by,3,0,Math.PI*2);ctx.fill();ctx.restore();}for(var i=0;i<targets.length;i++){var t=targets[i];ctx.save();ctx.fillStyle=t.flash>0?'#fff':'#ef4444';ctx.shadowColor=t.flash>0?'#fff':'#ef4444';ctx.shadowBlur=t.flash>0?16:8;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.fill();ctx.restore();}requestAnimationFrame(loop);}loop();}());
+
+/* PRICE CHECK PREVIEW */
+(function(){var pc=document.getElementById('price-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,fadeT=0,qi=0,items=[{e:'👟',n:'Air Jordan 1',p:'$180'},{e:'📱',n:'iPhone 15',p:'$799'},{e:'🎮',n:'PS5',p:'$499'},{e:'⌚',n:'Apple Watch',p:'$399'}];function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font=Math.round(H*0.3)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(items[qi].e,W/2,H*0.33);ctx.font='bold '+Math.round(H*0.1)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fillText(items[qi].n,W/2,H*0.6);var showP=fadeT>50?items[qi].p:'???';ctx.font='bold '+Math.round(H*0.15)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#F5C518';ctx.shadowColor='#F5C518';ctx.shadowBlur=10;ctx.fillText(showP,W/2,H*0.82);ctx.restore();if(fadeT>90){fadeT=0;qi=(qi+1)%items.length;}requestAnimationFrame(draw);}draw();}());
+
+/* WYR PREVIEW */
+(function(){var pc=document.getElementById('wyr-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,questions=['Fame or Fortune?','Fly or Invisible?','Drake or LeBron?','NYC or LA?'],qi=0,fadeT=0,barA=0,barB=0,targetA=0,targetB=0,revealed=false;function newQ(){qi=(qi+1)%questions.length;revealed=false;barA=0;barB=0;fadeT=0;targetA=40+Math.floor(Math.random()*20);targetB=100-targetA;}function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font='bold '+Math.round(H*0.1)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(255,255,255,0.45)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('WOULD YOU RATHER',W/2,H*0.18);ctx.font='bold '+Math.round(H*0.09)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText(questions[qi],W/2,H*0.36);var bw=W*0.42,bh=H*0.24,gap=W*0.04,ax=W/2-bw-gap/2,bx=W/2+gap/2,by=H*0.54;ctx.fillStyle='rgba(168,85,247,0.15)';ctx.strokeStyle='rgba(168,85,247,0.45)';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(ax,by,bw,bh,3);ctx.fill();ctx.stroke();ctx.fillStyle='rgba(59,130,246,0.15)';ctx.strokeStyle='rgba(59,130,246,0.45)';ctx.beginPath();ctx.roundRect(bx,by,bw,bh,3);ctx.fill();ctx.stroke();if(revealed){barA=Math.min(targetA,barA+1.5);barB=Math.min(targetB,barB+1.5);ctx.fillStyle='rgba(168,85,247,0.3)';ctx.beginPath();ctx.roundRect(ax,by,bw*(barA/100),bh,3);ctx.fill();ctx.font='bold '+Math.round(H*0.1)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#d8b4fe';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.round(barA)+'%',ax+bw/2,by+bh/2);ctx.fillStyle='rgba(59,130,246,0.3)';ctx.beginPath();ctx.roundRect(bx,by,bw*(barB/100),bh,3);ctx.fill();ctx.fillStyle='#93c5fd';ctx.fillText(Math.round(barB)+'%',bx+bw/2,by+bh/2);}if(fadeT>60&&!revealed)revealed=true;if(fadeT>130)newQ();ctx.restore();requestAnimationFrame(draw);}newQ();draw();}());
+
+/* CALORIE COUNT PREVIEW */
+(function(){var pc=document.getElementById('cal-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,fadeT=0,qi=0,items=[{e:'🍔',n:'Big Mac',c:550},{e:'🍕',n:'Pizza Slice',c:285},{e:'🌮',n:'Chipotle Burrito',c:925},{e:'☕',n:'Frappuccino',c:420}];function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font=Math.round(H*0.28)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(items[qi].e,W/2,H*0.32);ctx.font='bold '+Math.round(H*0.09)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#fff';ctx.fillText(items[qi].n,W/2,H*0.58);var showCal=Math.round(items[qi].c*Math.min(1,Math.max(0,(fadeT-30)/40)));ctx.font='bold '+Math.round(H*0.12)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#f97316';ctx.shadowColor='#f97316';ctx.shadowBlur=10;ctx.fillText(showCal+' cal',W/2,H*0.78);ctx.restore();if(fadeT>90){fadeT=0;qi=(qi+1)%items.length;}requestAnimationFrame(draw);}draw();}());
+
+/* YEAR GUESSER PREVIEW */
+(function(){var pc=document.getElementById('year-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,events=[{e:'🌕',t:'Neil Armstrong walked on the Moon',y:1969},{e:'📱',t:'Apple released the first iPhone',y:2007},{e:'🧱',t:'The Berlin Wall fell',y:1989}],qi=0,fadeT=0,yr=1950;function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a14';ctx.fillRect(0,0,W,H);var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font=Math.round(H*0.18)+'px serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(events[qi].e,W/2,H*0.04);ctx.font='bold '+Math.round(H*0.075)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(255,255,255,0.8)';ctx.textBaseline='middle';ctx.fillText(events[qi].t,W/2,H*0.52);if(fadeT>20)yr=Math.min(events[qi].y,yr+Math.ceil((events[qi].y-yr)*0.08)+1);ctx.font='bold '+Math.round(H*0.14)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#F5C518';ctx.shadowColor='#F5C518';ctx.shadowBlur=12;ctx.fillText(Math.round(yr),W/2,H*0.82);ctx.restore();if(fadeT>100){fadeT=0;qi=(qi+1)%events.length;yr=1900;}requestAnimationFrame(draw);}draw();}());
+
+/* CROWD GUESS PREVIEW */
+(function(){var pc=document.getElementById('crowd-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,items=[{e:'🏟️',n:'Super Bowl Viewers',c:'113M'},{e:'🎤',n:'Coachella Daily',c:'125K'},{e:'🌆',n:'Times Square NYE',c:'58K'}],qi=0,fadeT=0;function draw(){fr++;fadeT++;ctx.fillStyle='#0a0814';ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=0.1;for(var i=0;i<80;i++){ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.arc((i*67+fr)%W,(i*43)%H,1.5,0,Math.PI*2);ctx.fill();}ctx.restore();var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font=Math.round(H*0.25)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(items[qi].e,W/2,H*0.3);ctx.font='bold '+Math.round(H*0.09)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#fff';ctx.fillText(items[qi].n,W/2,H*0.57);ctx.font='bold '+Math.round(H*0.13)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#8b5cf6';ctx.shadowColor='#8b5cf6';ctx.shadowBlur=12;ctx.fillText(items[qi].c,W/2,H*0.8);ctx.restore();if(fadeT>90){fadeT=0;qi=(qi+1)%items.length;}requestAnimationFrame(draw);}draw();}());
+
+/* DISTANCE PREVIEW */
+(function(){var pc=document.getElementById('dist-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,pairs=[{a:'New York 🗽',b:'London 🇬🇧',d:'3,459 mi'},{a:'LA 🌴',b:'Tokyo 🗼',d:'5,479 mi'},{a:'Miami 🌊',b:'Chicago 🏙️',d:'1,377 mi'}],qi=0,fadeT=0,dotX=0;function draw(){fr++;fadeT++;ctx.fillStyle='#0a0f14';ctx.fillRect(0,0,W,H);var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font='bold '+Math.round(H*0.1)+'px Barlow Condensed,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#06b6d4';ctx.fillText(pairs[qi].a,W*0.04,H*0.3);ctx.textAlign='right';ctx.fillStyle='#3b82f6';ctx.fillText(pairs[qi].b,W*0.96,H*0.3);ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=2;ctx.setLineDash([8,6]);ctx.beginPath();ctx.moveTo(W*0.04,H*0.5);ctx.lineTo(W*0.96,H*0.5);ctx.stroke();ctx.setLineDash([]);dotX=(dotX+2)%W;ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✈️',dotX,H*0.5);ctx.font='bold '+Math.round(H*0.12)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.fillStyle='#06b6d4';ctx.shadowColor='#06b6d4';ctx.shadowBlur=12;ctx.fillText(pairs[qi].d,W/2,H*0.78);ctx.restore();if(fadeT>100){fadeT=0;qi=(qi+1)%pairs.length;dotX=0;}requestAnimationFrame(draw);}draw();}());
+
+/* DAILY FLAG PREVIEW */
+(function(){var pc=document.getElementById('flag-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,flags=[{f:'🇧🇷',n:'Brazil'},{f:'🇯🇵',n:'Japan'},{f:'🇫🇷',n:'France'},{f:'🇳🇬',n:'Nigeria'},{f:'🇦🇺',n:'Australia'}],qi=0,fadeT=0;function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.filter='blur('+Math.max(0,20-(fadeT*0.25))+'px)';ctx.font=Math.round(H*0.55)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(flags[qi].f,W/2,H*0.42);ctx.filter='none';if(fadeT>60){var rev=Math.min(1,(fadeT-60)/20);ctx.globalAlpha=alpha*rev;ctx.font='bold '+Math.round(H*0.11)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#F5C518';ctx.shadowColor='#F5C518';ctx.shadowBlur=12;ctx.fillText(flags[qi].n,W/2,H*0.82);ctx.shadowBlur=0;}ctx.restore();if(fadeT>100){fadeT=0;qi=(qi+1)%flags.length;}requestAnimationFrame(draw);}draw();}());
+
+/* BUCKETS PREVIEW */
+(function(){var pc=document.getElementById('buckets-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,fadeT=0,qi=0,words=['JAMES','CURRY','KOBE','DURANT','GIANNIS'],colors={correct:'#22c55e',present:'#F5C518',absent:'#1e1e1e'},patterns=[['correct','absent','present','correct','absent'],['absent','correct','correct','absent','present'],['present','correct','absent','absent','correct'],['correct','correct','correct','correct','correct'],['absent','present','correct','present','absent']];function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var word=words[qi],pat=patterns[qi],tileW=Math.round(H*0.45),gap=6,totalW=word.length*tileW+(word.length-1)*gap,startX=(W-totalW)/2,startY=(H-tileW)/2,alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;for(var i=0;i<word.length;i++){var x=startX+i*(tileW+gap),y=startY,revealed=fadeT>30+i*15;ctx.fillStyle=revealed?colors[pat[i]]:'#1a1a1a';ctx.strokeStyle=revealed?colors[pat[i]]:'rgba(255,255,255,0.08)';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(x,y,tileW,tileW,3);ctx.fill();ctx.stroke();ctx.fillStyle=revealed?(pat[i]==='present'?'#0a0a0a':'#fff'):'rgba(255,255,255,0.45)';ctx.font='bold '+Math.round(tileW*0.52)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(word[i],x+tileW/2,y+tileW/2);}ctx.restore();if(fadeT>120){fadeT=0;qi=(qi+1)%words.length;}requestAnimationFrame(draw);}draw();}());
+
+/* NUMBLE PREVIEW */
+(function(){var pc=document.getElementById('numble-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,fadeT=0,qi=0,puzzles=[{num:'23',pat:['correct','correct'],label:'Jersey #'},{num:'81',pat:['high','correct'],label:'Record'},{num:'1996',pat:['correct','low','correct','high'],label:'Year'},{num:'73',pat:['correct','correct'],label:'Wins'}];function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var p=puzzles[qi],digits=p.num.length,tileW=Math.round(H*0.42),gap=8,totalW=digits*tileW+(digits-1)*gap,startX=(W-totalW)/2,startY=H*0.25,alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;ctx.font='bold '+Math.round(H*0.09)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(245,197,24,0.5)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.label,W/2,H*0.15);for(var i=0;i<digits;i++){var x=startX+i*(tileW+gap),y=startY,revealed=fadeT>25+i*18,col=revealed?(p.pat[i]==='correct'?'#22c55e':p.pat[i]==='high'?'#ef4444':'#3b82f6'):'#1a1a1a';ctx.fillStyle=col;ctx.strokeStyle=revealed?col:'rgba(255,255,255,0.08)';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(x,y,tileW,tileW,3);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold '+Math.round(tileW*0.52)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.num[i],x+tileW/2,y+tileW/2);}if(fadeT>25+digits*18){var fbCol=p.pat.every(function(x){return x==='correct';})?'#22c55e':p.pat[0]==='high'?'#ef4444':'#3b82f6',fbTxt=p.pat.every(function(x){return x==='correct';})?' ✓':p.pat[0]==='high'?'↓ TOO HIGH':'↑ TOO LOW';ctx.font='bold '+Math.round(H*0.09)+'px Barlow Condensed,sans-serif';ctx.fillStyle=fbCol;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(fbTxt,W/2,H*0.84);}ctx.restore();if(fadeT>130){fadeT=0;qi=(qi+1)%puzzles.length;}requestAnimationFrame(draw);}draw();}());
+
+/* SQUADS PREVIEW */
+(function(){var pc=document.getElementById('squads-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,t=0,colors=['#b59f3b','#538d4e','#3b82f6','#7c3aed'],names=[['LeBron','Kyrie','Love','Shumpert'],['Curry','Lillard','CP3','Trae'],['Wade','Bosh','Melo','LeBron'],['Shaq','Lamar','Gilbert','Metta']],phase=0;function draw(){fr++;t++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var cols=4,tileW=Math.floor((W-10)/cols-6),tileH=Math.floor((H-8)/4-5),startX=5,startY=4;for(var r=0;r<4;r++){for(var c=0;c<4;c++){var x=startX+c*(tileW+6),y=startY+r*(tileH+5),isRevealed=phase>r;ctx.fillStyle=isRevealed?colors[r]:'#1a1a1a';ctx.strokeStyle=isRevealed?colors[r]:'rgba(255,255,255,0.06)';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x,y,tileW,tileH,3);ctx.fill();ctx.stroke();ctx.fillStyle=isRevealed?'#fff':'rgba(255,255,255,0.45)';ctx.font='bold '+Math.round(tileH*0.28)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(names[r][c],x+tileW/2,y+tileH/2);}}if(t%80===0&&phase<4)phase++;if(phase>=4&&t%120===0){phase=0;t=0;}requestAnimationFrame(draw);}draw();}());
+
+/* FOOTBALL SQUADS PREVIEW */
+(function(){var pc=document.getElementById('nflsquads-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,t=0,colors=['#b59f3b','#538d4e','#3b82f6','#7c3aed'],names=[['Brady','Gronk','Moss','Edelman'],['Mahomes','Hill','Kelce','Tyreek'],['Manning','Rice','Favre','Elway'],['Shaq B','Urlacher','Butkus','Lewis']],phase=0;function draw(){fr++;t++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);var cols=4,tileW=Math.floor((W-10)/cols-6),tileH=Math.floor((H-8)/4-5),startX=5,startY=4;for(var r=0;r<4;r++){for(var c=0;c<4;c++){var x=startX+c*(tileW+6),y=startY+r*(tileH+5),isRevealed=phase>r;ctx.fillStyle=isRevealed?colors[r]:'#1a1a1a';ctx.strokeStyle=isRevealed?colors[r]:'rgba(255,255,255,0.06)';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x,y,tileW,tileH,3);ctx.fill();ctx.stroke();ctx.fillStyle=isRevealed?'#fff':'rgba(255,255,255,0.45)';ctx.font='bold '+Math.round(tileH*0.28)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(names[r][c],x+tileW/2,y+tileH/2);}}if(t%80===0&&phase<4)phase++;if(phase>=4&&t%120===0){phase=0;t=0;}requestAnimationFrame(draw);}draw();}());
+
+
+/* REIGNLE PREVIEW */
+(function(){var pc=document.getElementById('reignle-preview');if(!pc)return;var ctx=pc.getContext('2d'),W=pc.width,H=pc.height,fr=0,fadeT=0,qi=0;
+var reigns=[{belt:'🏆 WWF Championship',days:'434',champ:'???'},{belt:'🏆 Universal Championship',days:'1316',champ:'???'},{belt:'🏆 WWE Championship',days:'434',champ:'???'},{belt:'🏆 WCW Championship',days:'173',champ:'???'}];
+function draw(){fr++;fadeT++;ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+var r=reigns[qi],alpha=Math.min(1,fadeT/15);ctx.save();ctx.globalAlpha=alpha;
+ctx.font=Math.round(H*0.22)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🏆',W/2,H*0.22);
+ctx.font='bold '+Math.round(H*0.085)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(245,197,24,0.8)';ctx.fillText(r.belt.replace(/^.\s/,''),W/2,H*0.42);
+ctx.font='bold '+Math.round(H*0.22)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#fff';ctx.fillText(r.days,W/2,H*0.65);
+ctx.font='bold '+Math.round(H*0.07)+'px Barlow Condensed,sans-serif';ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillText('DAYS AS CHAMPION',W/2,H*0.81);
+if(fadeT>70){var rev=Math.min(1,(fadeT-70)/20);ctx.globalAlpha=alpha*rev;ctx.font='bold '+Math.round(H*0.09)+'px Barlow Condensed,sans-serif';ctx.fillStyle='#F5C518';ctx.shadowColor='#F5C518';ctx.shadowBlur=10;ctx.fillText('WHO IS IT?',W/2,H*0.93);ctx.shadowBlur=0;}
+ctx.restore();if(fadeT>110){fadeT=0;qi=(qi+1)%reigns.length;}requestAnimationFrame(draw);}draw();}());
+/* COMING SOON */
+(function(){var canvases=document.querySelectorAll('.soon-canvas');for(var ci=0;ci<canvases.length;ci++){(function(pc){var hue=parseInt(pc.getAttribute('data-hue')||'200'),ctx=pc.getContext('2d'),W=pc.width,H=pc.height,dots=[];for(var i=0;i<12;i++)dots.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+0.5,vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35,a:Math.random()*0.25+0.06});function draw(){ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);for(var i=0;i<dots.length;i++){var d=dots[i];d.x+=d.vx;d.y+=d.vy;if(d.x<0||d.x>W)d.vx*=-1;if(d.y<0||d.y>H)d.vy*=-1;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle='hsla('+hue+',65%,60%,'+d.a+')';ctx.fill();}for(var i=0;i<dots.length;i++){for(var j=i+1;j<dots.length;j++){var dx=dots[i].x-dots[j].x,dy=dots[i].y-dots[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<60){ctx.strokeStyle='hsla('+hue+',55%,50%,'+(0.08*(1-dist/60))+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(dots[i].x,dots[i].y);ctx.lineTo(dots[j].x,dots[j].y);ctx.stroke();}}}requestAnimationFrame(draw);}draw();}(canvases[ci]));}}());
+</script>
+</body>
+</html>
